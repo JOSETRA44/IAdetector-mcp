@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/IAdetector.Cli/IAdetector.Cli.csproj" />
+    <Project Path="src/IAdetector.Core/IAdetector.Core.csproj" />
+    <Project Path="src/IAdetector.Infrastructure/IAdetector.Infrastructure.csproj" />
+    <Project Path="src/IAdetector.Mcp/IAdetector.Mcp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/IAdetector.Core.Tests/IAdetector.Core.Tests.csproj" />
+    <Project Path="tests/IAdetector.Infrastructure.Tests/IAdetector.Infrastructure.Tests.csproj" />
+    <Project Path="tests/IAdetector.Integration.Tests/IAdetector.Integration.Tests.csproj" />
+  </Folder>
+</Solution>
