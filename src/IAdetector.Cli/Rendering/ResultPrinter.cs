@@ -13,7 +13,7 @@ internal static class ResultPrinter
 
     public static void PrintJson(IReadOnlyList<BatchDetectionEntry> entries, bool verbose) =>
         Console.WriteLine(JsonSerializer.Serialize(
-            entries.Select(e => DetectionResultProjection.Apply(e, verbose)),
+            entries.Select(e => DetectionResultProjection.Apply(e, verbose)).ToList(),
             DetectionJson.Options));
 
     public static void PrintHuman(string label, DetectionResult result, bool verbose, bool noColor)

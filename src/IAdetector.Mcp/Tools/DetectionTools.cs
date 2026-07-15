@@ -86,7 +86,7 @@ public sealed class DetectionTools(DetectTextUseCase detectText, BatchDetectUseC
         if (files.Count == 0)
         {
             return JsonSerializer.Serialize(
-                new { message = "No se encontraron archivos que coincidan con el patrón.", path, pattern },
+                new NoFilesFoundMessage("No se encontraron archivos que coincidan con el patrón.", path, pattern),
                 DetectionJson.Options);
         }
 
@@ -94,7 +94,7 @@ public sealed class DetectionTools(DetectTextUseCase detectText, BatchDetectUseC
             .ConfigureAwait(false);
 
         return JsonSerializer.Serialize(
-            entries.Select(e => DetectionResultProjection.Apply(e, verbose: false)),
+            entries.Select(e => DetectionResultProjection.Apply(e, verbose: false)).ToList(),
             DetectionJson.Options);
     }
 
