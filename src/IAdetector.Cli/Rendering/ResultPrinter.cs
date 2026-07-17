@@ -24,7 +24,8 @@ internal static class ResultPrinter
 
         if (result.ChunkInfo is { } chunk)
         {
-            Console.WriteLine($"  Fragmentado:     {chunk.TotalChunks} fragmentos ({chunk.TotalWords} palabras totales)");
+            var sampledNote = chunk.Sampled ? " — muestra representativa, no se analizó el documento completo" : "";
+            Console.WriteLine($"  Fragmentado:     {chunk.TotalChunks} fragmentos ({chunk.TotalWords} palabras totales){sampledNote}");
         }
 
         if (verbose)

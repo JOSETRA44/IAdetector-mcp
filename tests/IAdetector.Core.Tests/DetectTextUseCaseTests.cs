@@ -53,6 +53,28 @@ public class DetectTextUseCaseTests
     }
 
     [Fact]
+    public async Task DetectAsync_VeryLongText_SamplesInsteadOfAnalyzingEveryChunk()
+    {
+        // Un documento de 50 000 palabras generaría ~28 fragmentos naturales (ventanas de 2000,
+        // paso 1800) — muy por encima del límite de 20, así que debe muestrear en vez de analizar
+        // cada uno (evita minutos de latencia para un archivo grande en detect_file).
+        var analyzer = new RecordingAnalyzer("constant", s => new SignalScore("constant", 0.7, 0.7, 1.0, "x"));
+        var scorer = new RecordingScorer();
+        var useCase = new DetectTextUseCase([analyzer], scorer);
+
+        var text = string.Join(' ', Enumerable.Repeat("word", 50_000));
+        var result = await useCase.DetectAsync(text);
+
+        Assert.NotNull(result.ChunkInfo);
+        Assert.True(result.ChunkInfo!.Sampled);
+        Assert.Equal(20, result.ChunkInfo!.TotalChunks);
+        Assert.Equal(50_000, result.ChunkInfo!.TotalWords);
+
+        var aggregated = Assert.Single(scorer.LastScores!);
+        Assert.Equal(0.7, aggregated.NormalizedScore, precision: 6);
+    }
+
+    [Fact]
     public async Task DetectAsync_NoAnalyzers_StillCallsScorerWithEmptyList()
     {
         var scorer = new RecordingScorer();

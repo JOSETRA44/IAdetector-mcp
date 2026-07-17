@@ -22,6 +22,11 @@ internal static class BatchCommand
         {
             Description = "Guarda los resultados en formato CSV en este archivo, además de imprimirlos.",
         };
+        var maxFilesOption = new Option<int>("--max-files")
+        {
+            Description = "Número máximo de archivos a procesar (evita quedarse horas en un directorio enorme por error).",
+            DefaultValueFactory = _ => 1000,
+        };
 
         var command = new Command("batch", "Analiza todos los archivos de texto de un directorio.")
         {
@@ -32,6 +37,7 @@ internal static class BatchCommand
             verboseOption,
             noColorOption,
             outputOption,
+            maxFilesOption,
         };
 
         command.SetAction(async (parseResult, cancellationToken) =>
@@ -43,6 +49,7 @@ internal static class BatchCommand
             var verbose = parseResult.GetValue(verboseOption);
             var noColor = parseResult.GetValue(noColorOption);
             var output = parseResult.GetValue(outputOption);
+            var maxFiles = parseResult.GetValue(maxFilesOption);
 
             if (directory is null || !directory.Exists)
             {
@@ -51,7 +58,7 @@ internal static class BatchCommand
             }
 
             var searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            var files = Directory.EnumerateFiles(directory.FullName, pattern, searchOption).ToList();
+            var files = Directory.EnumerateFiles(directory.FullName, pattern, searchOption).Take(maxFiles).ToList();
 
             if (files.Count == 0)
             {

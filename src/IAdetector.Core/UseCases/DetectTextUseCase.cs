@@ -15,6 +15,12 @@ public sealed class DetectTextUseCase(IEnumerable<ISignalAnalyzer> analyzers, IE
     private const int ChunkWords = 2_000;
     private const int ChunkOverlapWords = 200;
 
+    // Acota el peor caso: sin esto, un archivo de varios MB (detect_file permite hasta 5MB) podría
+    // generar cientos de fragmentos procesados secuencialmente, cada uno corriendo 2 modelos ONNX
+    // — minutos de latencia para una sola detección. Por encima de este límite se muestrea
+    // uniformemente en vez de analizar cada fragmento.
+    private const int MaxChunks = 20;
+
     private readonly IReadOnlyList<ISignalAnalyzer> _analyzers = analyzers.ToList();
 
     public async Task<DetectionResult> DetectAsync(string text, CancellationToken cancellationToken = default)
@@ -34,10 +40,13 @@ public sealed class DetectTextUseCase(IEnumerable<ISignalAnalyzer> analyzers, IE
 
     private async Task<DetectionResult> AnalyzeChunkedAsync(TextSample fullSample, CancellationToken cancellationToken)
     {
-        var chunks = BuildChunks(fullSample.Words);
-        var perChunkScores = new List<(int WordCount, IReadOnlyList<SignalScore> Scores)>(chunks.Count);
+        var allChunks = BuildChunks(fullSample.Words);
+        var sampled = allChunks.Count > MaxChunks;
+        var chunksToAnalyze = sampled ? SampleEvenly(allChunks, MaxChunks) : allChunks;
 
-        foreach (var chunkWords in chunks)
+        var perChunkScores = new List<(int WordCount, IReadOnlyList<SignalScore> Scores)>(chunksToAnalyze.Count);
+
+        foreach (var chunkWords in chunksToAnalyze)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var chunkSample = TextSample.Create(string.Join(' ', chunkWords));
@@ -46,8 +55,23 @@ public sealed class DetectTextUseCase(IEnumerable<ISignalAnalyzer> analyzers, IE
         }
 
         var aggregated = AggregateSignals(perChunkScores);
-        var chunkInfo = new ChunkInfo(chunks.Count, fullSample.WordCount);
+        var chunkInfo = new ChunkInfo(chunksToAnalyze.Count, fullSample.WordCount, sampled);
         return scorer.Combine(fullSample, aggregated, chunkInfo);
+    }
+
+    private static List<List<string>> SampleEvenly(List<List<string>> chunks, int count)
+    {
+        // Selecciona `count` fragmentos uniformemente espaciados a lo largo de todo el documento
+        // (no solo el principio), para que la muestra siga siendo representativa del texto completo.
+        var step = chunks.Count / (double)count;
+        var result = new List<List<string>>(count);
+        for (var i = 0; i < count; i++)
+        {
+            var index = Math.Min((int)(i * step), chunks.Count - 1);
+            result.Add(chunks[index]);
+        }
+
+        return result;
     }
 
     private async Task<IReadOnlyList<SignalScore>> RunAnalyzersAsync(TextSample sample, CancellationToken cancellationToken)

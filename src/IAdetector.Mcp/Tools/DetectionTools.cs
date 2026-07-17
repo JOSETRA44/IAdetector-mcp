@@ -17,6 +17,7 @@ public sealed class DetectionTools(DetectTextUseCase detectText, BatchDetectUseC
 {
     private const int MaxInlineTextLength = 20_000;
     private const long MaxFileSizeBytes = 5 * 1024 * 1024;
+    private const int HardMaxFilesPerBatch = 1_000;
 
     [McpServerTool(Name = "detect_text")]
     [Description("Analiza un texto y estima la probabilidad de que haya sido generado por IA, usando señales estadísticas/estilométricas locales (sin llamar a ninguna API externa).")]
@@ -81,7 +82,8 @@ public sealed class DetectionTools(DetectTextUseCase detectText, BatchDetectUseC
         }
 
         var searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-        var files = Directory.EnumerateFiles(path, pattern, searchOption).Take(maxFiles).ToList();
+        var effectiveMaxFiles = Math.Clamp(maxFiles, 1, HardMaxFilesPerBatch);
+        var files = Directory.EnumerateFiles(path, pattern, searchOption).Take(effectiveMaxFiles).ToList();
 
         if (files.Count == 0)
         {
