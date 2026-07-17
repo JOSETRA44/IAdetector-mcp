@@ -9,12 +9,13 @@ namespace IAdetector.Cli.Rendering;
 internal static class ResultPrinter
 {
     public static void PrintJson(DetectionResult result, bool verbose) =>
-        Console.WriteLine(JsonSerializer.Serialize(DetectionResultProjection.Apply(result, verbose), DetectionJson.Options));
+        Console.WriteLine(JsonSerializer.Serialize(
+            DetectionResultProjection.Apply(result, verbose), IAdetectorJsonContext.Default.DetectionResult));
 
     public static void PrintJson(IReadOnlyList<BatchDetectionEntry> entries, bool verbose) =>
         Console.WriteLine(JsonSerializer.Serialize(
             entries.Select(e => DetectionResultProjection.Apply(e, verbose)).ToList(),
-            DetectionJson.Options));
+            IAdetectorJsonContext.Default.ListBatchDetectionEntry));
 
     public static void PrintHuman(string label, DetectionResult result, bool verbose, bool noColor)
     {

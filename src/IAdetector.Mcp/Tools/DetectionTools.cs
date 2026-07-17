@@ -89,7 +89,7 @@ public sealed class DetectionTools(DetectTextUseCase detectText, BatchDetectUseC
         {
             return JsonSerializer.Serialize(
                 new NoFilesFoundMessage("No se encontraron archivos que coincidan con el patrón.", path, pattern),
-                DetectionJson.Options);
+                IAdetectorJsonContext.Default.NoFilesFoundMessage);
         }
 
         var entries = await batchDetect.DetectFilesAsync(files, maxDegreeOfParallelism: 4, cancellationToken)
@@ -97,7 +97,7 @@ public sealed class DetectionTools(DetectTextUseCase detectText, BatchDetectUseC
 
         return JsonSerializer.Serialize(
             entries.Select(e => DetectionResultProjection.Apply(e, verbose: false)).ToList(),
-            DetectionJson.Options);
+            IAdetectorJsonContext.Default.ListBatchDetectionEntry);
     }
 
     [McpServerTool(Name = "explain_detection")]
@@ -108,5 +108,5 @@ public sealed class DetectionTools(DetectTextUseCase detectText, BatchDetectUseC
         => DetectText(text, verbose: true, cancellationToken);
 
     private static string Serialize(DetectionResult result, bool verbose) =>
-        JsonSerializer.Serialize(DetectionResultProjection.Apply(result, verbose), DetectionJson.Options);
+        JsonSerializer.Serialize(DetectionResultProjection.Apply(result, verbose), IAdetectorJsonContext.Default.DetectionResult);
 }

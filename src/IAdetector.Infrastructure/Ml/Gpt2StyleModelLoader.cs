@@ -58,7 +58,7 @@ internal static class Gpt2StyleModelLoader
         // internamente, lo cual lanza InvalidOperationException bajo Native AOT (reflexión
         // deshabilitada). JsonSerializer.Deserialize aquí usa el contexto source-generated.
         var vocabJson = File.ReadAllText(Path.Combine(modelDir, "vocab.json"));
-        var vocabulary = JsonSerializer.Deserialize<Dictionary<string, int>>(vocabJson, DetectionJson.Options)
+        var vocabulary = JsonSerializer.Deserialize(vocabJson, IAdetectorJsonContext.Default.DictionaryStringInt32)
             ?? throw new InvalidOperationException("vocab.json vacío o inválido.");
         var merges = File.ReadAllLines(Path.Combine(modelDir, "merges.txt"))
             .Where(line => line.Length > 0 && !line.StartsWith("#version", StringComparison.Ordinal));

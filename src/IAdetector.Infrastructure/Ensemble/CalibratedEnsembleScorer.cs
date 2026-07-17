@@ -61,7 +61,7 @@ public sealed class CalibratedEnsembleScorer : IEnsembleScorer
         using var stream = assembly.GetManifestResourceStream(EmbeddedResourceName)
             ?? throw new InvalidOperationException($"No se encontró el recurso embebido '{EmbeddedResourceName}'.");
 
-        return JsonSerializer.Deserialize<EnsembleWeightsData>(stream, DetectionJson.Options)
+        return JsonSerializer.Deserialize(stream, IAdetectorJsonContext.Default.EnsembleWeightsData)
             ?? throw new InvalidOperationException("EnsembleWeights.json embebido vacío o inválido.");
     }
 }

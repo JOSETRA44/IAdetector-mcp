@@ -26,4 +26,4 @@ public sealed record NoFilesFoundMessage(string Message, string Path, string Pat
 [JsonSerializable(typeof(Dictionary<string, int>))]
 [JsonSerializable(typeof(Dictionary<string, double>))]
 [JsonSerializable(typeof(EnsembleWeightsData))]
-internal partial class IAdetectorJsonContext : JsonSerializerContext;
+public partial class IAdetectorJsonContext : JsonSerializerContext;
