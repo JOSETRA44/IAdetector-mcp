@@ -1,16 +1,17 @@
 {
-  "intercept": -6.3510661240319015,
+  "intercept": -7.709248516745426,
   "weights": {
-    "burstiness": 3.2364457940938745,
-    "type-token-ratio": 0.15504876251162475,
-    "lexical-entropy": 0.3536407192431417,
-    "compression-ratio": 0.9838223087775494,
-    "ngram-repetition": 0.642903550924978,
-    "onnx-classifier": 5.850085116917695
+    "burstiness": 2.5594615746584846,
+    "type-token-ratio": 0.15637300193766557,
+    "lexical-entropy": 0.5073957040799992,
+    "compression-ratio": 1.2248696587358405,
+    "ngram-repetition": 0.3431048349207578,
+    "onnx-classifier": 3.8127840166178584,
+    "perplexity": 5.911586370511742
   },
   "trainedOn": {
     "samples": 1684,
-    "cvAccuracy": 0.9530804012999858,
-    "trainAccuracy": 0.9536817102137767
+    "cvAccuracy": 0.9685194997880459,
+    "trainAccuracy": 0.9709026128266033
   }
 }

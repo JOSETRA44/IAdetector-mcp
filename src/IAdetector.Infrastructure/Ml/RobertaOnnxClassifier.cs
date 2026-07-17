@@ -1,9 +1,6 @@
-using System.Text.Json;
 using IAdetector.Core.Abstractions;
-using IAdetector.Infrastructure.Serialization;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
-using Microsoft.ML.Tokenizers;
 
 namespace IAdetector.Infrastructure.Ml;
 
@@ -23,7 +20,9 @@ public sealed class RobertaOnnxClassifier(IModelCache cache) : IOnnxClassifier, 
     // config.json del modelo: id2label = {"0": "Fake", "1": "Real"}. "Fake" = generado por IA.
     private const int AiLabelIndex = 0;
 
-    private readonly Lazy<LoadedModel> _loaded = new(() => Load(cache), LazyThreadSafetyMode.ExecutionAndPublication);
+    private readonly Lazy<Gpt2StyleModelLoader.Loaded> _loaded = new(
+        () => Gpt2StyleModelLoader.Load(cache.GetPath(ModelCatalog.RobertaOpenAiDetector), "logits"),
+        LazyThreadSafetyMode.ExecutionAndPublication);
 
     public string ModelId => ModelCatalog.RobertaOpenAiDetector;
 
@@ -64,44 +63,6 @@ public sealed class RobertaOnnxClassifier(IModelCache cache) : IOnnxClassifier, 
         return exps.Select(e => e / sum).ToArray();
     }
 
-    private static LoadedModel Load(IModelCache cache)
-    {
-        var dir = cache.GetPath(ModelCatalog.RobertaOpenAiDetector);
-
-        var session = new InferenceSession(Path.Combine(dir, "model.onnx"));
-
-        // Se parsea vocab.json/merges.txt a mano (en vez de usar el constructor de BpeOptions que
-        // recibe rutas de archivo) porque ese constructor deserializa el JSON por reflexión
-        // internamente, lo cual lanza InvalidOperationException bajo Native AOT (reflexión
-        // deshabilitada). JsonSerializer.Deserialize aquí usa el contexto source-generated.
-        var vocabJson = File.ReadAllText(Path.Combine(dir, "vocab.json"));
-        var vocabulary = JsonSerializer.Deserialize<Dictionary<string, int>>(vocabJson, DetectionJson.Options)
-            ?? throw new InvalidOperationException("vocab.json vacío o inválido.");
-        var merges = File.ReadAllLines(Path.Combine(dir, "merges.txt"))
-            .Where(line => line.Length > 0 && !line.StartsWith("#version", StringComparison.Ordinal));
-
-        // ByteLevel=true es imprescindible: sin él, BpeTokenizer no antepone el marcador de
-        // espacio byte-level ('Ġ') a las palabras que siguen a un espacio y tokeniza distinto a
-        // como fue entrenado el modelo (confirmado: "world" da id 8331 en vez del correcto 232
-        // de "Ġworld"). RobertaPreTokenizer aporta el regex de segmentación correcto para RoBERTa.
-        var options = new BpeOptions(vocabulary)
-        {
-            Merges = merges,
-            PreTokenizer = RobertaPreTokenizer.Instance,
-            ByteLevel = true,
-        };
-        var tokenizer = BpeTokenizer.Create(options);
-
-        var inputIdsName = session.InputMetadata.Keys.FirstOrDefault(n => n.Equals("input_ids", StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException("El modelo ONNX no expone una entrada 'input_ids'.");
-        var attentionMaskName = session.InputMetadata.Keys.FirstOrDefault(n => n.Equals("attention_mask", StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException("El modelo ONNX no expone una entrada 'attention_mask'.");
-        var outputName = session.OutputMetadata.Keys.FirstOrDefault(n => n.Contains("logits", StringComparison.OrdinalIgnoreCase))
-            ?? session.OutputMetadata.Keys.First();
-
-        return new LoadedModel(session, tokenizer, inputIdsName, attentionMaskName, outputName);
-    }
-
     public void Dispose()
     {
         if (_loaded.IsValueCreated)
@@ -109,6 +70,4 @@ public sealed class RobertaOnnxClassifier(IModelCache cache) : IOnnxClassifier, 
             _loaded.Value.Session.Dispose();
         }
     }
-
-    private sealed record LoadedModel(InferenceSession Session, Tokenizer Tokenizer, string InputIdsName, string AttentionMaskName, string OutputName);
 }

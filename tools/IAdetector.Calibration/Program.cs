@@ -29,6 +29,7 @@ string[] signalNames =
     "compression-ratio",
     "ngram-repetition",
     "onnx-classifier",
+    "perplexity",
 ];
 
 await using var writer = new StreamWriter(outputPath);

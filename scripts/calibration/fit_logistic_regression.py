@@ -21,6 +21,7 @@ SIGNAL_NAMES = [
     "compression-ratio",
     "ngram-repetition",
     "onnx-classifier",
+    "perplexity",
 ]
 
 

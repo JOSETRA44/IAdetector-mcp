@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IModelDownloader, HttpModelDownloader>();
         services.AddSingleton<IOnnxClassifier>(sp => new RobertaOnnxClassifier(sp.GetRequiredService<IModelCache>()));
         services.AddSingleton<ISignalAnalyzer, OnnxSignalAnalyzer>();
+        services.AddSingleton<ISignalAnalyzer, DistilGpt2PerplexityAnalyzer>();
 
         services.AddSingleton<DetectTextUseCase>();
         services.AddSingleton<BatchDetectUseCase>();
