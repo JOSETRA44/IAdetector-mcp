@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using IAdetector.Core.Domain;
 using IAdetector.Core.UseCases;
+using IAdetector.Infrastructure.Ensemble;
 
 namespace IAdetector.Infrastructure.Serialization;
 
@@ -15,9 +16,14 @@ public sealed record NoFilesFoundMessage(string Message, string Path, string Pat
 /// que de otro modo dependería de la deserialización por reflexión interna de
 /// <c>Microsoft.ML.Tokenizers.BpeOptions</c>.
 /// </summary>
-[JsonSourceGenerationOptions(WriteIndented = true, Converters = [typeof(JsonStringEnumConverter<Verdict>)])]
+[JsonSourceGenerationOptions(
+    WriteIndented = true,
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+    Converters = [typeof(JsonStringEnumConverter<Verdict>)])]
 [JsonSerializable(typeof(DetectionResult))]
 [JsonSerializable(typeof(List<BatchDetectionEntry>))]
 [JsonSerializable(typeof(NoFilesFoundMessage))]
 [JsonSerializable(typeof(Dictionary<string, int>))]
+[JsonSerializable(typeof(Dictionary<string, double>))]
+[JsonSerializable(typeof(EnsembleWeightsData))]
 internal partial class IAdetectorJsonContext : JsonSerializerContext;

@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISignalAnalyzer, CompressionRatioAnalyzer>();
         services.AddSingleton<ISignalAnalyzer, NGramRepetitionAnalyzer>();
 
-        services.AddSingleton<IEnsembleScorer, WeightedEnsembleScorer>();
+        services.AddSingleton<IEnsembleScorer, CalibratedEnsembleScorer>();
 
         services.AddSingleton<IModelCache, FileSystemModelCache>();
         services.AddSingleton<IModelDownloader, HttpModelDownloader>();

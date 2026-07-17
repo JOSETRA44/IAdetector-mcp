@@ -1,0 +1,16 @@
+{
+  "intercept": -6.3510661240319015,
+  "weights": {
+    "burstiness": 3.2364457940938745,
+    "type-token-ratio": 0.15504876251162475,
+    "lexical-entropy": 0.3536407192431417,
+    "compression-ratio": 0.9838223087775494,
+    "ngram-repetition": 0.642903550924978,
+    "onnx-classifier": 5.850085116917695
+  },
+  "trainedOn": {
+    "samples": 1684,
+    "cvAccuracy": 0.9530804012999858,
+    "trainAccuracy": 0.9536817102137767
+  }
+}
