@@ -9,7 +9,10 @@ namespace IAdetector.Core.UseCases;
 /// ventanas solapadas para mantener el análisis representativo y acotar el costo por fragmento;
 /// el resultado final agrega las señales de todos los fragmentos antes de aplicar el ensemble.
 /// </summary>
-public sealed class DetectTextUseCase(IEnumerable<ISignalAnalyzer> analyzers, IEnsembleScorer scorer)
+public sealed class DetectTextUseCase(
+    IEnumerable<ISignalAnalyzer> analyzers,
+    IEnsembleScorer scorer,
+    IDetectionCache? cache = null)
 {
     private const int ChunkWordThreshold = 2_500;
     private const int ChunkWords = 2_000;
@@ -25,11 +28,43 @@ public sealed class DetectTextUseCase(IEnumerable<ISignalAnalyzer> analyzers, IE
 
     public async Task<DetectionResult> DetectAsync(string text, CancellationToken cancellationToken = default)
     {
+        var outcome = await DetectWithCacheAsync(text, DetectionCacheMode.ReadWrite, cancellationToken).ConfigureAwait(false);
+        return outcome.Result;
+    }
+
+    /// <summary>
+    /// Igual que <see cref="DetectAsync"/> pero controlando la caché de resultados y reportando
+    /// si hubo acierto. Se cachea siempre el resultado COMPLETO (con todas las señales); el
+    /// recorte de verbose es cosa de la capa de presentación, no de la caché.
+    /// </summary>
+    public async Task<DetectionOutcome> DetectWithCacheAsync(
+        string text,
+        DetectionCacheMode cacheMode = DetectionCacheMode.ReadWrite,
+        CancellationToken cancellationToken = default)
+    {
+        // Se tokeniza antes de consultar la caché: es una pasada de regex (irrelevante frente a
+        // la inferencia ONNX) y deja el conteo de palabras disponible también en los aciertos.
         var sample = TextSample.Create(text);
 
-        return sample.WordCount <= ChunkWordThreshold
+        if (cache is not null && cacheMode == DetectionCacheMode.ReadWrite)
+        {
+            var hit = await cache.TryGetAsync(text, cancellationToken).ConfigureAwait(false);
+            if (hit is not null)
+            {
+                return new DetectionOutcome(hit, Cached: true, sample.WordCount);
+            }
+        }
+
+        var result = sample.WordCount <= ChunkWordThreshold
             ? await AnalyzeSingleAsync(sample, cancellationToken).ConfigureAwait(false)
             : await AnalyzeChunkedAsync(sample, cancellationToken).ConfigureAwait(false);
+
+        if (cache is not null && cacheMode != DetectionCacheMode.Disabled)
+        {
+            await cache.SetAsync(text, result, cancellationToken).ConfigureAwait(false);
+        }
+
+        return new DetectionOutcome(result, Cached: false, sample.WordCount);
     }
 
     private async Task<DetectionResult> AnalyzeSingleAsync(TextSample sample, CancellationToken cancellationToken)
@@ -40,18 +75,18 @@ public sealed class DetectTextUseCase(IEnumerable<ISignalAnalyzer> analyzers, IE
 
     private async Task<DetectionResult> AnalyzeChunkedAsync(TextSample fullSample, CancellationToken cancellationToken)
     {
-        var allChunks = BuildChunks(fullSample.Words);
+        var allChunks = BuildChunks(fullSample.Text);
         var sampled = allChunks.Count > MaxChunks;
         var chunksToAnalyze = sampled ? SampleEvenly(allChunks, MaxChunks) : allChunks;
 
         var perChunkScores = new List<(int WordCount, IReadOnlyList<SignalScore> Scores)>(chunksToAnalyze.Count);
 
-        foreach (var chunkWords in chunksToAnalyze)
+        foreach (var chunkText in chunksToAnalyze)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var chunkSample = TextSample.Create(string.Join(' ', chunkWords));
+            var chunkSample = TextSample.Create(chunkText);
             var scores = await RunAnalyzersAsync(chunkSample, cancellationToken).ConfigureAwait(false);
-            perChunkScores.Add((chunkWords.Count, scores));
+            perChunkScores.Add((chunkSample.WordCount, scores));
         }
 
         var aggregated = AggregateSignals(perChunkScores);
@@ -59,12 +94,12 @@ public sealed class DetectTextUseCase(IEnumerable<ISignalAnalyzer> analyzers, IE
         return scorer.Combine(fullSample, aggregated, chunkInfo);
     }
 
-    private static List<List<string>> SampleEvenly(List<List<string>> chunks, int count)
+    private static List<string> SampleEvenly(List<string> chunks, int count)
     {
         // Selecciona `count` fragmentos uniformemente espaciados a lo largo de todo el documento
         // (no solo el principio), para que la muestra siga siendo representativa del texto completo.
         var step = chunks.Count / (double)count;
-        var result = new List<List<string>>(count);
+        var result = new List<string>(count);
         for (var i = 0; i < count; i++)
         {
             var index = Math.Min((int)(i * step), chunks.Count - 1);
@@ -80,16 +115,25 @@ public sealed class DetectTextUseCase(IEnumerable<ISignalAnalyzer> analyzers, IE
         return await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
-    private static List<List<string>> BuildChunks(IReadOnlyList<string> words)
+    private static List<string> BuildChunks(string text)
     {
-        var chunks = new List<List<string>>();
+        // Se fragmenta sobre los offsets de las palabras en el texto ORIGINAL (no sobre la lista
+        // de palabras ya despojada de puntuación) y se recorta directamente del texto original:
+        // reconstruir un chunk uniendo palabras sueltas con espacios eliminaría toda la puntuación,
+        // dejando cada fragmento como una única "oración" gigante y anulando en silencio la señal
+        // de burstiness (y distorsionando compression-ratio) en cualquier documento largo.
+        var wordSpans = TextTokenizer.SplitWordSpans(text);
+        var chunks = new List<string>();
         var step = ChunkWords - ChunkOverlapWords;
 
-        for (var start = 0; start < words.Count; start += step)
+        for (var start = 0; start < wordSpans.Count; start += step)
         {
-            var length = Math.Min(ChunkWords, words.Count - start);
-            chunks.Add([.. words.Skip(start).Take(length)]);
-            if (start + length >= words.Count)
+            var length = Math.Min(ChunkWords, wordSpans.Count - start);
+            var (firstStart, _) = wordSpans[start];
+            var (lastStart, lastLength) = wordSpans[start + length - 1];
+            chunks.Add(text[firstStart..(lastStart + lastLength)]);
+
+            if (start + length >= wordSpans.Count)
             {
                 break;
             }
@@ -110,11 +154,12 @@ public sealed class DetectTextUseCase(IEnumerable<ISignalAnalyzer> analyzers, IE
             {
                 var weightedRaw = g.Sum(x => x.Score.RawValue * x.WordCount) / (double)totalWords;
                 var weightedNorm = g.Sum(x => x.Score.NormalizedScore * x.WordCount) / (double)totalWords;
+                var weightedWeight = g.Sum(x => x.Score.Weight * x.WordCount) / (double)totalWords;
                 return new SignalScore(
                     g.Key,
                     weightedRaw,
                     weightedNorm,
-                    g.First().Score.Weight,
+                    weightedWeight,
                     $"Promedio ponderado sobre {g.Count()} fragmentos.");
             })
             .ToList();

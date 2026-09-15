@@ -36,6 +36,25 @@ public static partial class TextTokenizer
             .ToList();
     }
 
+    /// <summary>
+    /// Igual que <see cref="SplitWords"/> pero devuelve la posición de cada palabra en <paramref name="text"/>
+    /// en vez del valor ya extraído. Permite recortar sub-cadenas del texto original que preservan
+    /// puntuación/mayúsculas (a diferencia de reconstruir texto uniendo palabras con espacios, que
+    /// destruiría los límites de oración que <see cref="SplitSentences"/> necesita detectar).
+    /// </summary>
+    public static IReadOnlyList<(int Start, int Length)> SplitWordSpans(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return [];
+        }
+
+        return WordRegex()
+            .Matches(text)
+            .Select(m => (m.Index, m.Length))
+            .ToList();
+    }
+
     // Divide tras ./!/? seguido de espacio + mayúscula (o fin de cadena), para no cortar en
     // abreviaturas/decimales como "Sr." o "3.14" seguidos de minúscula.
     [GeneratedRegex(@"(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡\p{Lu}])")]
