@@ -18,6 +18,11 @@ public sealed class OnnxSignalAnalyzer(IModelCache cache, IOnnxClassifier classi
     // heurísticas estadísticas puras; peso provisional, sujeto a la calibración de la Fase 3.
     private const double Weight = 2.0;
 
+    // Igual que perplexity: con muy poco texto el clasificador no tiene contenido real que juzgar
+    // y aun así devuelve una probabilidad con aparente alta confianza, dominando el ensemble
+    // (es la señal de mayor peso calibrado) sobre entradas vacías o casi vacías.
+    private const int MinWords = 20;
+
     public async Task<SignalScore> AnalyzeAsync(TextSample sample, CancellationToken cancellationToken = default)
     {
         if (!cache.IsDownloaded(classifier.ModelId))
@@ -25,6 +30,13 @@ public sealed class OnnxSignalAnalyzer(IModelCache cache, IOnnxClassifier classi
             return new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
                 $"Modelo '{classifier.ModelId}' no descargado. Ejecuta 'iadetector models download' para activar esta señal.");
+        }
+
+        if (sample.WordCount < MinWords)
+        {
+            return new SignalScore(
+                Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
+                $"Muy pocas palabras ({sample.WordCount}) para que el clasificador sea confiable.");
         }
 
         var aiProbability = await classifier.ClassifyAsync(sample.Text, cancellationToken).ConfigureAwait(false);

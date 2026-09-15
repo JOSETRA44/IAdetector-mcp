@@ -9,6 +9,12 @@ namespace IAdetector.Infrastructure.Serialization;
 public sealed record NoFilesFoundMessage(string Message, string Path, string Pattern);
 
 /// <summary>
+/// Una entrada de la caché de resultados en disco (ver <see cref="Caching.FileSystemDetectionCache"/>).
+/// <paramref name="Version"/> se re-verifica al leer para descartar entradas de otra calibración.
+/// </summary>
+public sealed record CachedDetectionEntry(string Version, DateTimeOffset FetchedAt, DetectionResult Result);
+
+/// <summary>
 /// Contexto de serialización JSON generado en tiempo de compilación (sin reflexión), requerido
 /// para que la publicación Native AOT (Fase 6) funcione: <c>JsonSerializer</c> con resolución por
 /// reflexión lanza <see cref="InvalidOperationException"/> en binarios AOT/trimmed. También cubre
@@ -23,6 +29,7 @@ public sealed record NoFilesFoundMessage(string Message, string Path, string Pat
 [JsonSerializable(typeof(DetectionResult))]
 [JsonSerializable(typeof(List<BatchDetectionEntry>))]
 [JsonSerializable(typeof(NoFilesFoundMessage))]
+[JsonSerializable(typeof(CachedDetectionEntry))]
 [JsonSerializable(typeof(Dictionary<string, int>))]
 [JsonSerializable(typeof(Dictionary<string, double>))]
 [JsonSerializable(typeof(EnsembleWeightsData))]

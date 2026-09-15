@@ -1,8 +1,5 @@
-using System.Reflection;
-using System.Text.Json;
 using IAdetector.Core.Abstractions;
 using IAdetector.Core.Domain;
-using IAdetector.Infrastructure.Serialization;
 
 namespace IAdetector.Infrastructure.Ensemble;
 
@@ -14,12 +11,10 @@ namespace IAdetector.Infrastructure.Ensemble;
 /// </summary>
 public sealed class CalibratedEnsembleScorer : IEnsembleScorer
 {
-    private const string EmbeddedResourceName = "IAdetector.Infrastructure.Ensemble.EnsembleWeights.json";
-
     private readonly EnsembleWeightsData _weights;
 
     public CalibratedEnsembleScorer()
-        : this(LoadEmbeddedWeights())
+        : this(EnsembleWeightsResource.Load())
     {
     }
 
@@ -54,14 +49,4 @@ public sealed class CalibratedEnsembleScorer : IEnsembleScorer
     }
 
     private static double Sigmoid(double z) => 1.0 / (1.0 + Math.Exp(-z));
-
-    private static EnsembleWeightsData LoadEmbeddedWeights()
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream(EmbeddedResourceName)
-            ?? throw new InvalidOperationException($"No se encontró el recurso embebido '{EmbeddedResourceName}'.");
-
-        return JsonSerializer.Deserialize(stream, IAdetectorJsonContext.Default.EnsembleWeightsData)
-            ?? throw new InvalidOperationException("EnsembleWeights.json embebido vacío o inválido.");
-    }
 }

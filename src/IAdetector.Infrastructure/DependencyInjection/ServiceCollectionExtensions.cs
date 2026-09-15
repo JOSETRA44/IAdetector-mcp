@@ -1,5 +1,6 @@
 using IAdetector.Core.Abstractions;
 using IAdetector.Core.UseCases;
+using IAdetector.Infrastructure.Caching;
 using IAdetector.Infrastructure.Ensemble;
 using IAdetector.Infrastructure.Ml;
 using IAdetector.Infrastructure.Signals;
@@ -26,6 +27,11 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEnsembleScorer, CalibratedEnsembleScorer>();
 
         services.AddSingleton<IModelCache, FileSystemModelCache>();
+
+        // La caché de resultados se registra también por su tipo concreto porque el comando
+        // `cache stats|clear|path` necesita administrarla, no solo consultarla.
+        services.AddSingleton<FileSystemDetectionCache>();
+        services.AddSingleton<IDetectionCache>(sp => sp.GetRequiredService<FileSystemDetectionCache>());
         services.AddSingleton<IModelDownloader, HttpModelDownloader>();
         services.AddSingleton<IOnnxClassifier>(sp => new RobertaOnnxClassifier(sp.GetRequiredService<IModelCache>()));
         services.AddSingleton<ISignalAnalyzer, OnnxSignalAnalyzer>();
