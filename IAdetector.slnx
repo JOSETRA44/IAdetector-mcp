@@ -8,6 +8,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/IAdetector.Core.Tests/IAdetector.Core.Tests.csproj" />
     <Project Path="tests/IAdetector.Infrastructure.Tests/IAdetector.Infrastructure.Tests.csproj" />
+    <Project Path="tests/IAdetector.Cli.Tests/IAdetector.Cli.Tests.csproj" />
     <Project Path="tests/IAdetector.Integration.Tests/IAdetector.Integration.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">

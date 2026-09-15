@@ -1,0 +1,125 @@
+{
+  "server_url": "src/IAdetector.Mcp/bin/Debug/net10.0/win-x64/IAdetector.Mcp.exe",
+  "transport": "stdio",
+  "fetched_at": "2026-07-17T22:19:11Z",
+  "tool_count": 4,
+  "tools": [
+    {
+      "name": "detect_text",
+      "description": "Analiza un texto pegado directamente (no un archivo) y estima la probabilidad de que haya sido generado por IA, combinando 7 señales estadísticas y 2 modelos ONNX locales (sin llamar a ninguna API externa). Devuelve un JSON con veredicto, probabilidad de IA, confianza y desglose de señales. Para el contenido de un archivo en disco usa detect_file en su lugar — no lo leas tú mismo para pegarlo aquí.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "description": "Texto a analizar (máximo 20000 caracteres; para textos más largos usar detect_file).",
+            "type": "string"
+          },
+          "verbose": {
+            "description": "Si es true, incluye el desglose completo de cada señal individual con su explicación.",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "optional"
+      }
+    },
+    {
+      "name": "batch_detect_directory",
+      "description": "Analiza todos los archivos de un directorio que coincidan con un patrón (por defecto *.txt), devolviendo un array JSON con un resultado (o error) por archivo. Úsala en vez de llamar a detect_file repetidamente cuando hay más de un archivo que analizar.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "Ruta absoluta del directorio a analizar.",
+            "type": "string"
+          },
+          "pattern": {
+            "description": "Patrón glob de archivos a incluir, ej. '*.txt'.",
+            "type": "string",
+            "default": "*.txt"
+          },
+          "recursive": {
+            "description": "Si es true, busca también en subdirectorios.",
+            "type": "boolean",
+            "default": false
+          },
+          "maxFiles": {
+            "description": "Número máximo de archivos a procesar en esta llamada (entre 1 y 1000; por defecto 100).",
+            "type": "integer",
+            "default": 100
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "optional"
+      }
+    },
+    {
+      "name": "explain_detection",
+      "description": "Equivalente a detect_text con verbose=true: analiza un texto pegado directamente y siempre devuelve el JSON con el desglose completo de señales y su explicación en lenguaje natural. Úsala cuando el usuario pida explícitamente el porqué de un veredicto; para el uso normal (solo veredicto/probabilidad) usa detect_text.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "description": "Texto a analizar (máximo 20000 caracteres).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "optional"
+      }
+    },
+    {
+      "name": "detect_file",
+      "description": "Analiza el contenido de un archivo de texto local (máximo 5MB) y estima la probabilidad de que haya sido generado por IA; fragmenta y, si es muy largo, muestrea automáticamente el documento. Devuelve el mismo JSON que detect_text (veredicto, probabilidad, confianza, señales). Para texto pegado directamente en la conversación usa detect_text en su lugar; para varios archivos a la vez usa batch_detect_directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "Ruta absoluta del archivo de texto a analizar.",
+            "type": "string"
+          },
+          "verbose": {
+            "description": "Si es true, incluye el desglose completo de cada señal individual.",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "optional"
+      }
+    }
+  ]
+}

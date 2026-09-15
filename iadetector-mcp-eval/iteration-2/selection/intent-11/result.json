@@ -1,0 +1,7 @@
+{
+  "selected_tool": "explain_detection",
+  "arguments": {
+    "text": "La optimización de recursos constituye un elemento fundamental para el éxito organizacional."
+  },
+  "reasoning": "El usuario pide explícitamente conocer las señales específicas y el porqué del veredicto sobre un texto pegado directamente, que es exactamente lo que explain_detection devuelve (desglose completo de señales con explicación en lenguaje natural)."
+}

@@ -1,0 +1,5 @@
+{
+  "selected_tool": "explain_detection",
+  "arguments": {},
+  "reasoning": "El usuario pide explícitamente conocer el porqué del veredicto con detalle en vez de solo el resultado, que es justo para lo que sirve explain_detection (desglose completo de señales con explicación en lenguaje natural)."
+}

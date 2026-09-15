@@ -1,0 +1,267 @@
+{
+  "accuracy": 1.0,
+  "total": 23,
+  "correct": 23,
+  "wrong_tool": 0,
+  "false_accept": 0,
+  "false_reject": 0,
+  "per_tool": {
+    "batch_detect_directory": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_count": 3,
+      "selected_count": 3
+    },
+    "detect_file": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_count": 4,
+      "selected_count": 4
+    },
+    "detect_text": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_count": 4,
+      "selected_count": 4
+    },
+    "explain_detection": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_count": 4,
+      "selected_count": 4
+    },
+    "none": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_count": 8,
+      "selected_count": 8
+    }
+  },
+  "confusion_matrix": {
+    "detect_text": {
+      "detect_text": 4
+    },
+    "detect_file": {
+      "detect_file": 4
+    },
+    "batch_detect_directory": {
+      "batch_detect_directory": 3
+    },
+    "explain_detection": {
+      "explain_detection": 4
+    },
+    "none": {
+      "none": 8
+    }
+  },
+  "worst_confusions": [],
+  "grades": [
+    {
+      "intent_id": 1,
+      "intent": "Analiza este texto y dime si crees que lo escribió una IA: 'La inteligencia artificial ha transformado significativamente la manera en que las organizaciones abordan sus procesos de negocio, permitiendo una optimización sin precedentes de los recursos disponibles.'",
+      "expected": "detect_text",
+      "actual": "detect_text",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 2,
+      "intent": "Este párrafo que me pegó un compañero en el chat suena medio robótico, ¿tú qué opinas, será de ChatGPT?",
+      "expected": "detect_text",
+      "actual": "detect_text",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 3,
+      "intent": "oye revisa esto que me mandaron para la tarea, se siente medio extraño, dame tu veredicto",
+      "expected": "detect_text",
+      "actual": "detect_text",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 4,
+      "intent": "Analiza el archivo C:/Users/USER/Documents/ensayo_final.txt y dime si fue escrito por IA",
+      "expected": "detect_file",
+      "actual": "detect_file",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 5,
+      "intent": "Tengo un archivo en mi escritorio llamado tarea_maria.txt, ¿podrías chequear si mi compañera lo escribió con IA?",
+      "expected": "detect_file",
+      "actual": "detect_file",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 6,
+      "intent": "revisa el .txt que está en la carpeta del proyecto, sospecho que lo generaron con IA",
+      "expected": "detect_file",
+      "actual": "detect_file",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 7,
+      "intent": "Analiza todos los archivos .txt de la carpeta C:/informes y dime cuáles parecen generados por IA",
+      "expected": "batch_detect_directory",
+      "actual": "batch_detect_directory",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 8,
+      "intent": "Tengo como 20 ensayos de estudiantes guardados en una carpeta, necesito saber cuáles son sospechosos de usar IA",
+      "expected": "batch_detect_directory",
+      "actual": "batch_detect_directory",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 9,
+      "intent": "chequea toda la carpeta de entregas de mis alumnos, quiero un resumen de cuáles huelen a IA",
+      "expected": "batch_detect_directory",
+      "actual": "batch_detect_directory",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 10,
+      "intent": "Explícame en detalle por qué este texto parecería generado por IA, quiero entender cada señal, no solo el número: 'Además, es fundamental destacar que la implementación de estas metodologías conlleva múltiples beneficios sustanciales.'",
+      "expected": "explain_detection",
+      "actual": "explain_detection",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 11,
+      "intent": "No solo me digas si es IA o no, quiero saber qué señales específicas te hicieron sospechar de este texto que te pego: 'La optimización de recursos constituye un elemento fundamental para el éxito organizacional.'",
+      "expected": "explain_detection",
+      "actual": "explain_detection",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 12,
+      "intent": "dale, pero esta vez no me des solo el veredicto pelado, cuéntame el por qué con detalle",
+      "expected": "explain_detection",
+      "actual": "explain_detection",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_trigger"
+    },
+    {
+      "intent_id": 13,
+      "intent": "Busca en internet ejemplos de texto generado por IA para comparar con el mío",
+      "expected": "none",
+      "actual": "none",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_not_trigger"
+    },
+    {
+      "intent_id": 14,
+      "intent": "Genera un texto que suene como si lo hubiera escrito una IA, para usarlo de ejemplo",
+      "expected": "none",
+      "actual": "none",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_not_trigger"
+    },
+    {
+      "intent_id": 15,
+      "intent": "Traduce este archivo informe.txt al inglés",
+      "expected": "none",
+      "actual": "none",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_not_trigger"
+    },
+    {
+      "intent_id": 16,
+      "intent": "Corrige la ortografía y gramática de este texto que te pego: 'esto tiene herrores de hortografia'",
+      "expected": "none",
+      "actual": "none",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_not_trigger"
+    },
+    {
+      "intent_id": 17,
+      "intent": "Sube el archivo resumen.txt a mi Google Drive para compartirlo con el equipo",
+      "expected": "none",
+      "actual": "none",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_not_trigger"
+    },
+    {
+      "intent_id": 18,
+      "intent": "Dame estadísticas de cuántas palabras y párrafos tiene el archivo tesis.txt",
+      "expected": "none",
+      "actual": "none",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_not_trigger"
+    },
+    {
+      "intent_id": 19,
+      "intent": "Elimina todos los archivos .txt de la carpeta borradores que sean spam",
+      "expected": "none",
+      "actual": "none",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_not_trigger"
+    },
+    {
+      "intent_id": 20,
+      "intent": "¿Puedes resumir el contenido del archivo reporte_anual.txt en tres puntos clave?",
+      "expected": "none",
+      "actual": "none",
+      "verdict": "correct",
+      "pass": true,
+      "type": "should_not_trigger"
+    },
+    {
+      "intent_id": 21,
+      "intent": "Aquí está el texto completo pegado, no tengo ningún archivo guardado: 'El presente informe analiza las tendencias del mercado durante el último trimestre fiscal.' ¿esto es de IA?",
+      "expected": "detect_text",
+      "actual": "detect_text",
+      "verdict": "correct",
+      "pass": true,
+      "type": "disambiguation"
+    },
+    {
+      "intent_id": 22,
+      "intent": "¿Podrías decirme con detalle cada una de las señales que usarías para concluir si este texto es de IA, no solo el resultado final?: 'La estrategia de negocio requiere un análisis exhaustivo de las variables del entorno.'",
+      "expected": "explain_detection",
+      "actual": "explain_detection",
+      "verdict": "correct",
+      "pass": true,
+      "type": "disambiguation"
+    },
+    {
+      "intent_id": 23,
+      "intent": "No uses el análisis por lotes, solo revisa este único archivo puntual: notas_reunion.txt",
+      "expected": "detect_file",
+      "actual": "detect_file",
+      "verdict": "correct",
+      "pass": true,
+      "type": "disambiguation"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "selected_tool": null,
+  "arguments": {},
+  "reasoning": "Ninguna de las tools del MCP realiza búsquedas en internet; todas operan sobre texto o archivos ya proporcionados por el usuario, no sobre contenido a buscar en la web."
+}

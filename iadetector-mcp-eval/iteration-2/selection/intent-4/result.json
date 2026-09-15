@@ -1,0 +1,5 @@
+{
+  "selected_tool": "detect_file",
+  "arguments": { "path": "C:/Users/USER/Documents/ensayo_final.txt" },
+  "reasoning": "El usuario pide analizar un archivo existente en disco por su ruta, que es exactamente el caso de uso de detect_file en lugar de detect_text (para texto pegado) o batch_detect_directory (para múltiples archivos)."
+}

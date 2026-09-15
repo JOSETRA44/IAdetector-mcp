@@ -1,0 +1,5 @@
+{
+  "selected_tool": "detect_file",
+  "arguments": { "path": "C:/Users/USER/Desktop/tarea_maria.txt" },
+  "reasoning": "El usuario pide analizar un archivo de texto que ya existe en disco (tarea_maria.txt en el escritorio), no un texto pegado en la conversación, por lo que corresponde usar detect_file con la ruta del archivo."
+}

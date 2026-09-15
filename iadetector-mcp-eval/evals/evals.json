@@ -1,0 +1,190 @@
+{
+  "server_name": "IAdetector.Mcp",
+  "generated_from": "tools.json",
+  "intents": [
+    {
+      "id": 1,
+      "intent": "Analiza este texto y dime si crees que lo escribió una IA: 'La inteligencia artificial ha transformado significativamente la manera en que las organizaciones abordan sus procesos de negocio, permitiendo una optimización sin precedentes de los recursos disponibles.'",
+      "expected_tool": "detect_text",
+      "type": "should_trigger",
+      "target_tool": "detect_text",
+      "notes": "Direct request, text pasted inline"
+    },
+    {
+      "id": 2,
+      "intent": "Este párrafo que me pegó un compañero en el chat suena medio robótico, ¿tú qué opinas, será de ChatGPT?",
+      "expected_tool": "detect_text",
+      "type": "should_trigger",
+      "target_tool": "detect_text",
+      "notes": "Implicit intent, casual phrasing"
+    },
+    {
+      "id": 3,
+      "intent": "oye revisa esto que me mandaron para la tarea, se siente medio extraño, dame tu veredicto",
+      "expected_tool": "detect_text",
+      "type": "should_trigger",
+      "target_tool": "detect_text",
+      "notes": "Casual/domain jargon"
+    },
+    {
+      "id": 4,
+      "intent": "Analiza el archivo C:/Users/USER/Documents/ensayo_final.txt y dime si fue escrito por IA",
+      "expected_tool": "detect_file",
+      "type": "should_trigger",
+      "target_tool": "detect_file",
+      "notes": "Direct request, explicit file path"
+    },
+    {
+      "id": 5,
+      "intent": "Tengo un archivo en mi escritorio llamado tarea_maria.txt, ¿podrías chequear si mi compañera lo escribió con IA?",
+      "expected_tool": "detect_file",
+      "type": "should_trigger",
+      "target_tool": "detect_file",
+      "notes": "Implicit intent, file referenced by name"
+    },
+    {
+      "id": 6,
+      "intent": "revisa el .txt que está en la carpeta del proyecto, sospecho que lo generaron con IA",
+      "expected_tool": "detect_file",
+      "type": "should_trigger",
+      "target_tool": "detect_file",
+      "notes": "Casual, vague file reference"
+    },
+    {
+      "id": 7,
+      "intent": "Analiza todos los archivos .txt de la carpeta C:/informes y dime cuáles parecen generados por IA",
+      "expected_tool": "batch_detect_directory",
+      "type": "should_trigger",
+      "target_tool": "batch_detect_directory",
+      "notes": "Direct request, explicit directory"
+    },
+    {
+      "id": 8,
+      "intent": "Tengo como 20 ensayos de estudiantes guardados en una carpeta, necesito saber cuáles son sospechosos de usar IA",
+      "expected_tool": "batch_detect_directory",
+      "type": "should_trigger",
+      "target_tool": "batch_detect_directory",
+      "notes": "Implicit intent, multiple files implied"
+    },
+    {
+      "id": 9,
+      "intent": "chequea toda la carpeta de entregas de mis alumnos, quiero un resumen de cuáles huelen a IA",
+      "expected_tool": "batch_detect_directory",
+      "type": "should_trigger",
+      "target_tool": "batch_detect_directory",
+      "notes": "Casual/domain jargon"
+    },
+    {
+      "id": 10,
+      "intent": "Explícame en detalle por qué este texto parecería generado por IA, quiero entender cada señal, no solo el número: 'Además, es fundamental destacar que la implementación de estas metodologías conlleva múltiples beneficios sustanciales.'",
+      "expected_tool": "explain_detection",
+      "type": "should_trigger",
+      "target_tool": "explain_detection",
+      "notes": "Direct request, explicitly wants breakdown"
+    },
+    {
+      "id": 11,
+      "intent": "No solo me digas si es IA o no, quiero saber qué señales específicas te hicieron sospechar de este texto que te pego: 'La optimización de recursos constituye un elemento fundamental para el éxito organizacional.'",
+      "expected_tool": "explain_detection",
+      "type": "should_trigger",
+      "target_tool": "explain_detection",
+      "notes": "Implicit intent, wants full explanation"
+    },
+    {
+      "id": 12,
+      "intent": "dale, pero esta vez no me des solo el veredicto pelado, cuéntame el por qué con detalle",
+      "expected_tool": "explain_detection",
+      "type": "should_trigger",
+      "target_tool": "explain_detection",
+      "notes": "Casual, follow-up style request"
+    },
+    {
+      "id": 13,
+      "intent": "Busca en internet ejemplos de texto generado por IA para comparar con el mío",
+      "expected_tool": null,
+      "type": "should_not_trigger",
+      "target_tool": null,
+      "notes": "Near-miss: no tool does web search"
+    },
+    {
+      "id": 14,
+      "intent": "Genera un texto que suene como si lo hubiera escrito una IA, para usarlo de ejemplo",
+      "expected_tool": null,
+      "type": "should_not_trigger",
+      "target_tool": null,
+      "notes": "Keyword overlap: generation, not detection"
+    },
+    {
+      "id": 15,
+      "intent": "Traduce este archivo informe.txt al inglés",
+      "expected_tool": null,
+      "type": "should_not_trigger",
+      "target_tool": null,
+      "notes": "Near-miss: file-related but wrong operation (translation)"
+    },
+    {
+      "id": 16,
+      "intent": "Corrige la ortografía y gramática de este texto que te pego: 'esto tiene herrores de hortografia'",
+      "expected_tool": null,
+      "type": "should_not_trigger",
+      "target_tool": null,
+      "notes": "Keyword overlap: text-related but wrong operation (proofreading)"
+    },
+    {
+      "id": 17,
+      "intent": "Sube el archivo resumen.txt a mi Google Drive para compartirlo con el equipo",
+      "expected_tool": null,
+      "type": "should_not_trigger",
+      "target_tool": null,
+      "notes": "Beyond capability: no cloud upload tool exists"
+    },
+    {
+      "id": 18,
+      "intent": "Dame estadísticas de cuántas palabras y párrafos tiene el archivo tesis.txt",
+      "expected_tool": null,
+      "type": "should_not_trigger",
+      "target_tool": null,
+      "notes": "Near-miss: file-related but not AI-detection (word count)"
+    },
+    {
+      "id": 19,
+      "intent": "Elimina todos los archivos .txt de la carpeta borradores que sean spam",
+      "expected_tool": null,
+      "type": "should_not_trigger",
+      "target_tool": null,
+      "notes": "Keyword overlap: directory/batch-related but destructive, wrong operation"
+    },
+    {
+      "id": 20,
+      "intent": "¿Puedes resumir el contenido del archivo reporte_anual.txt en tres puntos clave?",
+      "expected_tool": null,
+      "type": "should_not_trigger",
+      "target_tool": null,
+      "notes": "Near-miss: file-related but summarization, not AI-detection"
+    },
+    {
+      "id": 21,
+      "intent": "Aquí está el texto completo pegado, no tengo ningún archivo guardado: 'El presente informe analiza las tendencias del mercado durante el último trimestre fiscal.' ¿esto es de IA?",
+      "expected_tool": "detect_text",
+      "type": "disambiguation",
+      "target_tool": "detect_text",
+      "notes": "detect_text vs detect_file: explicitly says text is pasted, no file exists"
+    },
+    {
+      "id": 22,
+      "intent": "¿Podrías decirme con detalle cada una de las señales que usarías para concluir si este texto es de IA, no solo el resultado final?: 'La estrategia de negocio requiere un análisis exhaustivo de las variables del entorno.'",
+      "expected_tool": "explain_detection",
+      "type": "disambiguation",
+      "target_tool": "explain_detection",
+      "notes": "detect_text vs explain_detection: explicitly wants full breakdown, not just verdict"
+    },
+    {
+      "id": 23,
+      "intent": "No uses el análisis por lotes, solo revisa este único archivo puntual: notas_reunion.txt",
+      "expected_tool": "detect_file",
+      "type": "disambiguation",
+      "target_tool": "detect_file",
+      "notes": "detect_file vs batch_detect_directory: explicit negation of batch processing, single file"
+    }
+  ]
+}

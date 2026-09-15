@@ -1,0 +1,5 @@
+{
+  "selected_tool": null,
+  "arguments": {},
+  "reasoning": "Ninguna de las tools disponibles (detect_text, batch_detect_directory, explain_detection, detect_file) realiza subida o compartición de archivos en Google Drive, ya que todas pertenecen a un servicio de detección de texto generado por IA."
+}

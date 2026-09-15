@@ -1,0 +1,5 @@
+{
+  "selected_tool": "detect_text",
+  "arguments": {},
+  "reasoning": "El usuario pide un veredicto sobre un texto que le enviaron y que \"se siente extraño\", sin mencionar un archivo en disco, por lo que corresponde analizar el contenido pegado directamente con detect_text."
+}

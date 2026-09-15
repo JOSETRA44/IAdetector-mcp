@@ -1,0 +1,5 @@
+{
+  "selected_tool": null,
+  "arguments": {},
+  "reasoning": "Ninguna tool del servidor puede eliminar archivos ni tomar decisiones de borrado; todas ellas solo analizan/detectan texto generado por IA, no gestionan ni borran archivos del sistema."
+}

@@ -1,0 +1,7 @@
+{
+  "selected_tool": "detect_text",
+  "arguments": {
+    "text": "Este párrafo que me pegó un compañero en el chat suena medio robótico, ¿tú qué opinas, será de ChatGPT?"
+  },
+  "reasoning": "El usuario pegó un texto directamente en el chat (no un archivo) y quiere saber si suena generado por IA, que es exactamente el caso de uso de detect_text."
+}

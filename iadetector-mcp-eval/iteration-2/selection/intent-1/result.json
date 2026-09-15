@@ -1,0 +1,7 @@
+{
+  "selected_tool": "detect_text",
+  "arguments": {
+    "text": "La inteligencia artificial ha transformado significativamente la manera en que las organizaciones abordan sus procesos de negocio, permitiendo una optimización sin precedentes de los recursos disponibles."
+  },
+  "reasoning": "El usuario pegó el texto directamente en el mensaje (no es un archivo) y solo pide el veredicto general, por lo que detect_text es la tool adecuada."
+}

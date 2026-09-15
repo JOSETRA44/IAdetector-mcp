@@ -1,0 +1,5 @@
+{
+  "selected_tool": null,
+  "arguments": {},
+  "reasoning": "El usuario pide un resumen de un archivo, no una detección de contenido generado por IA, y ninguna de las tools disponibles (todas orientadas a detectar texto generado por IA) ofrece funcionalidad de resumen."
+}

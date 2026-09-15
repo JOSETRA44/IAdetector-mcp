@@ -14,6 +14,11 @@
 # Estado local de sesión (Claude Code), no forma parte del proyecto
 /.claude/
 
+# IAdetector: las skills distribuibles viven en /skills/ (rastreado); esto es solo el
+# lockfile/caché local que genera `npx skills add` al materializarlas en .claude/skills/
+skills-lock.json
+.skills.json
+
 # User-specific files
 *.rsuser
 *.suo

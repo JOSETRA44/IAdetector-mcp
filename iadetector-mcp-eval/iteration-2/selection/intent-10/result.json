@@ -1,0 +1,7 @@
+{
+  "selected_tool": "explain_detection",
+  "arguments": {
+    "text": "Además, es fundamental destacar que la implementación de estas metodologías conlleva múltiples beneficios sustanciales."
+  },
+  "reasoning": "El usuario pide explícitamente entender el porqué de cada señal detrás del veredicto para un texto pegado directamente, que es exactamente el caso de uso de explain_detection."
+}

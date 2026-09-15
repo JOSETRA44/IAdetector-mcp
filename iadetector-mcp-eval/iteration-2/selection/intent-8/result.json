@@ -1,0 +1,5 @@
+{
+  "selected_tool": "batch_detect_directory",
+  "arguments": { "path": "RUTA_DE_LA_CARPETA_CON_LOS_ENSAYOS", "pattern": "*.txt" },
+  "reasoning": "El usuario tiene múltiples archivos (unos 20 ensayos) en una carpeta y quiere identificar cuáles son sospechosos, lo que corresponde exactamente al análisis por lote de un directorio en vez de llamar detect_file repetidamente."
+}

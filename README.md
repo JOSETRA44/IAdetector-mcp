@@ -1,11 +1,42 @@
 # IAdetector
 
+<!-- mcp-name: io.github.JOSETRA44/iadetector-mcp -->
+
 Detecta si un texto fue generado por IA, **100% local**: sin llamar a ninguna API externa de pago (OpenAI, GPTZero, Originality.ai, etc.). Combina señales estadísticas/estilométricas puras con dos modelos ONNX pequeños que corren localmente (un clasificador RoBERTa y un modelo de perplexity DistilGPT-2), calibradas mediante regresión logística sobre datos reales (HC3).
 
 Consumible de dos formas sobre el mismo motor:
 
 - **Servidor MCP** (`IAdetector.Mcp`) — tools para que un agente (Claude Code, VS Code Copilot, etc.) analice texto.
 - **CLI** (`IAdetector.Cli`, comando `iadetector`) — para uso directo en terminal o scripts.
+
+
+[![NuGet](https://img.shields.io/nuget/v/IAdetector.Cli.svg)](https://www.nuget.org/packages/IAdetector.Cli)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/JOSETRA44/iadetector-mcp/blob/main/LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-server-blue.svg)](https://modelcontextprotocol.io)
+
+## Qué puedes preguntarle
+
+| Pregunta | Herramienta que responde |
+|---|---|
+| "¿Este texto lo escribió una IA?" | `detect_text` |
+| "Analiza este archivo" | `detect_file` |
+| "Revisa los 500 documentos de esta carpeta" | `batch_detect_directory` |
+| "¿Por qué dio ese veredicto?" | `explain_detection` |
+
+**Todo ocurre en tu máquina.** No hay API externa, no hay clave, y el texto
+analizado **nunca sale del equipo**. Es la diferencia esencial frente a GPTZero,
+Originality.ai o cualquier detector en la nube: puedes analizar un manuscrito
+inédito o un documento confidencial sin entregárselo a nadie.
+
+> [!IMPORTANT]
+> **Un resultado es evidencia, nunca prueba.** La detección de texto generado por
+> IA es probabilística y tiene falsos positivos reales, que además afectan de
+> forma desproporcionada a quien escribe en un idioma que no es el suyo y a la
+> prosa técnica muy formulaica.
+>
+> No uses esta herramienta como única base para acusar a un estudiante o a un
+> trabajador. Sirve para priorizar qué revisar con criterio humano, no para
+> decidir por ti.
 
 ## Arquitectura
 
@@ -107,6 +138,7 @@ Se cachean en `%LOCALAPPDATA%\IAdetector\models` (Windows) con verificación de 
 ```bash
 iadetector detect archivo.txt [--json] [--verbose] [--no-color]
 iadetector detect --text "texto a analizar" [--verbose]
+cat archivo.txt | iadetector detect               # también lee de stdin si no hay archivo ni --text
 iadetector batch <directorio> [--pattern *.txt] [--recursive] [--max-files 1000] [--output resultados.csv]
 iadetector models download --model <id> [--force]
 iadetector models list
@@ -118,6 +150,27 @@ iadetector models list
 - `detect_file(path, verbose)` — archivo local (máx. 5MB; fragmenta automáticamente textos largos, muestreando si son muy grandes).
 - `batch_detect_directory(path, pattern, recursive, maxFiles)` — varios archivos a la vez.
 - `explain_detection(text)` — como `detect_text` pero siempre con el desglose completo de señales.
+
+## Skills para agentes (Claude Code)
+
+`skills/` (layout plano estándar `skills/<nombre>/SKILL.md`, el mismo que usan proyectos como Vercel o Supabase para distribuir sus propias skills) incluye dos skills instalables con [`npx skills`](https://github.com/vercel-labs/skills):
+
+- **`iadetector-setup`** — instalar, publicar y configurar el CLI/MCP, descargar los modelos ONNX, registrar el servidor en `.mcp.json`.
+- **`iadetector-usage`** — interpretar los resultados (veredicto, probabilidad, confianza) y comunicarlos sin sobre-afirmar certeza.
+
+Nota: viven en `skills/` (rastreado por git) y no en `.claude/skills/` (ignorado — es estado local por sesión/máquina). Cada usuario materializa las que quiera usar en su propio `.claude/skills/` local corriendo el comando de instalación de abajo; no se commitea esa copia.
+
+Para instalarlas en otro proyecto una vez este repo esté en GitHub:
+
+```bash
+npx skills add <usuario>/IAdetector-mcp --skill iadetector-setup --skill iadetector-usage
+```
+
+O directamente desde una copia local del repo (sin necesidad de GitHub):
+
+```bash
+npx skills add /ruta/a/IAdetector-mcp --skill '*'
+```
 
 ## Desarrollo
 
@@ -141,3 +194,116 @@ python scripts/calibration/fit_logistic_regression.py scripts/calibration/data/f
 - El clasificador RoBERTa fue entrenado para detectar salidas de GPT-2 (2019); generaliza de forma imperfecta a estilos de LLMs más recientes — de ahí el ensemble con señales complementarias.
 - La señal de perplexity es una versión simplificada (un solo modelo) de la idea de Fast-DetectGPT/Binoculars, no la razón completa entre dos modelos.
 - Calibrado sobre un subconjunto de HC3 (inglés); no validado específicamente en español u otros idiomas.
+
+## CLI for agents
+
+Authorship screening that never leaves the machine — no text is sent anywhere.
+
+This CLI follows [`ARSENAL-SPEC.md`](../ARSENAL-SPEC.md), the contract every research
+tool in this workspace shares: an agent that can drive one can drive all of them.
+
+### Discover it without reading this file
+
+```bash
+iadetector describe --json          # every command, argument, row field and example
+iadetector describe <command> --json
+```
+
+The manifest is derived from the parser itself, so it cannot drift out of date.
+
+### Output
+
+`-f, --format` accepts `table`, `json`, `jsonl`, `csv`, `md`; `-o FILE` writes to a file; `-q` silences notes.
+**Data goes to stdout, notes and progress to stderr** — piping to `jq` always yields
+parseable JSON.
+
+`--format json` returns the standard envelope:
+
+```json
+{
+  "ok": true,
+  "command": "detect",
+  "source": "iadetector",
+  "fetched_at": "2026-08-21T14:03:11Z",
+  "cached": false,
+  "count": 10,
+  "meta": {},
+  "data": {},
+  "rows": []
+}
+```
+
+`count` always equals `len(rows)`. An empty result is exit 0, not an error. Failures
+return an error envelope carrying `error.code`, `error.message` and an actionable
+`error.hint`, printed to stdout in machine formats so a pipeline can inspect it.
+
+### Exit codes
+
+| Code | Meaning |
+|---|---|
+| 0 | Éxito, incluido un resultado vacío. |
+| 1 | El análisis falló o devolvió algo inesperado (modelo corrupto, error interno). |
+| 2 | Error de uso: flag desconocido, formato inválido, argumentos incompatibles. |
+| 3 | No se encontró el archivo, directorio o modelo indicado. |
+| 4 | No aplica: la detección es 100% local, no hay API key ni credenciales. |
+| 5 | No aplica: no hay servicio externo con cuota. |
+| 6 | Fallo de red o timeout — solo alcanzable en 'models download'. |
+
+### Cache
+
+Results are cached on disk and survive between invocations, so a repeated query is
+instant. `--refresh` refetches and rewrites; `--no-cache` skips it entirely; the
+envelope reports `cached`.
+
+```bash
+iadetector cache stats -f json
+iadetector cache clear
+```
+
+### Recipes
+
+```bash
+iadetector detect informe.txt -f json
+iadetector detect --text "un párrafo cualquiera" --verbose -f json
+cat ensayo.md | iadetector detect -f json
+iadetector batch corpus/ -f csv -o corpus.csv
+iadetector batch corpus/ --verbose -f jsonl --max 500
+```
+
+Or through the workspace-wide entry point: `arsenal run iadetector <command> ...`,
+and `arsenal doctor iadetector --live` to check this CLI still honours the contract.
+
+## Troubleshooting
+
+**`El modelo no está descargado`**
+Los modelos ONNX no vienen incluidos. Descárgalos una sola vez:
+`iadetector models download`. Ocupan unos cientos de MB y quedan en la caché de
+la aplicación; míralas con `iadetector models list`.
+
+**El primer análisis tarda mucho más que el resto**
+Es la carga inicial de los modelos ONNX en memoria. Los siguientes son rápidos, y
+un texto ya analizado sale de la caché de resultados al instante.
+
+**Reanalizar un corpus vuelve a tardar lo mismo**
+Comprueba que no estés pasando `--no-cache` o `--refresh`. Con
+`iadetector cache stats` ves cuántos resultados hay guardados. La clave incluye
+la versión de los modelos: si actualizas los modelos, la caché anterior queda
+obsoleta a propósito.
+
+**Un texto muy corto da confianza baja**
+Con pocas palabras las señales estadísticas no tienen material suficiente. Por
+debajo de un párrafo, el resultado no es informativo — y así lo reporta.
+
+## Documentation
+
+| Document | What's in it |
+|---|---|
+| [`CHANGELOG.md`](CHANGELOG.md) | What changed in each release |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Dev setup, the CLI contract, how to run the tests |
+| [`SECURITY.md`](SECURITY.md) | What this server sends and where; how to report a vulnerability |
+| [`server.json`](server.json) | Registry metadata for the official MCP registry |
+| [`../ARSENAL-SPEC.md`](../ARSENAL-SPEC.md) | The CLI contract shared by every research server here |
+
+## Licence
+
+MIT — see [`LICENSE`](LICENSE).

@@ -1,0 +1,5 @@
+{
+  "selected_tool": "detect_file",
+  "arguments": { "path": "C:/ruta/a/la/carpeta/del/proyecto/archivo.txt" },
+  "reasoning": "El usuario pide revisar un archivo .txt existente en disco dentro de la carpeta del proyecto, no texto pegado, por lo que corresponde detect_file en vez de detect_text."
+}

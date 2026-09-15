@@ -1,0 +1,7 @@
+{
+  "selected_tool": "explain_detection",
+  "arguments": {
+    "text": "La estrategia de negocio requiere un análisis exhaustivo de las variables del entorno."
+  },
+  "reasoning": "El usuario pide explícitamente el detalle de cada señal (el porqué del veredicto) sobre un texto pegado directamente, que es justo el caso de uso de explain_detection frente a detect_text."
+}

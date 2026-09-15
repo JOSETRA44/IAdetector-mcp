@@ -1,0 +1,5 @@
+{
+  "selected_tool": "detect_text",
+  "arguments": { "text": "El presente informe analiza las tendencias del mercado durante el último trimestre fiscal." },
+  "reasoning": "El usuario pegó el texto directamente en la conversación y no tiene un archivo guardado, por lo que corresponde detect_text en lugar de detect_file."
+}

@@ -1,0 +1,5 @@
+{
+  "selected_tool": null,
+  "arguments": {},
+  "reasoning": "Todas las tools disponibles sirven para detectar o analizar si un texto ya existente fue generado por IA, no para generar texto nuevo, así que ninguna encaja con la petición del usuario."
+}

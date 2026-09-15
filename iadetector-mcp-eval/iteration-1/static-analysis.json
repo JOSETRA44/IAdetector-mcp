@@ -1,0 +1,185 @@
+{
+  "tool_count": {
+    "count": 4,
+    "grade": "optimal"
+  },
+  "tools": [
+    {
+      "name": "detect_text",
+      "description_preview": "Analiza un texto y estima la probabilidad de que haya sido generado por IA, usan...",
+      "scores": {
+        "descriptionLength": {
+          "score": 3,
+          "chars": 162
+        },
+        "descriptionPattern": {
+          "score": 1,
+          "has": [
+            "action"
+          ]
+        },
+        "paramDescribeCoverage": {
+          "score": 3,
+          "described_pct": 100,
+          "param_count": 2
+        },
+        "schemaSpecificity": {
+          "score": 2
+        },
+        "annotationCoverage": {
+          "score": 0,
+          "annotations": []
+        },
+        "overall": 1.8
+      },
+      "issues": [
+        "Description does not mention return value",
+        "Description has no disambiguation/negation",
+        "No tool annotations set"
+      ]
+    },
+    {
+      "name": "batch_detect_directory",
+      "description_preview": "Analiza todos los archivos de texto de un directorio que coincidan con un patrón...",
+      "scores": {
+        "descriptionLength": {
+          "score": 3,
+          "chars": 119
+        },
+        "descriptionPattern": {
+          "score": 2,
+          "has": [
+            "action",
+            "returns"
+          ]
+        },
+        "paramDescribeCoverage": {
+          "score": 3,
+          "described_pct": 100,
+          "param_count": 4
+        },
+        "schemaSpecificity": {
+          "score": 3
+        },
+        "annotationCoverage": {
+          "score": 0,
+          "annotations": []
+        },
+        "overall": 2.2
+      },
+      "issues": [
+        "Description has no disambiguation/negation",
+        "No tool annotations set"
+      ]
+    },
+    {
+      "name": "explain_detection",
+      "description_preview": "Como detect_text, pero siempre devuelve el desglose completo de señales con expl...",
+      "scores": {
+        "descriptionLength": {
+          "score": 3,
+          "chars": 120
+        },
+        "descriptionPattern": {
+          "score": 1,
+          "has": [
+            "action"
+          ]
+        },
+        "paramDescribeCoverage": {
+          "score": 3,
+          "described_pct": 100,
+          "param_count": 1
+        },
+        "schemaSpecificity": {
+          "score": 0
+        },
+        "annotationCoverage": {
+          "score": 0,
+          "annotations": []
+        },
+        "overall": 1.4
+      },
+      "issues": [
+        "Description does not mention return value",
+        "Description has no disambiguation/negation",
+        "Parameters lack constraints (enum, pattern, bounds)",
+        "No tool annotations set"
+      ]
+    },
+    {
+      "name": "detect_file",
+      "description_preview": "Analiza el contenido de un archivo de texto local y estima la probabilidad de qu...",
+      "scores": {
+        "descriptionLength": {
+          "score": 3,
+          "chars": 159
+        },
+        "descriptionPattern": {
+          "score": 1,
+          "has": [
+            "action"
+          ]
+        },
+        "paramDescribeCoverage": {
+          "score": 3,
+          "described_pct": 100,
+          "param_count": 2
+        },
+        "schemaSpecificity": {
+          "score": 2
+        },
+        "annotationCoverage": {
+          "score": 0,
+          "annotations": []
+        },
+        "overall": 1.8
+      },
+      "issues": [
+        "Description does not mention return value",
+        "Description has no disambiguation/negation",
+        "No tool annotations set"
+      ]
+    }
+  ],
+  "sibling_pairs": [
+    {
+      "tool1": "detect_text",
+      "tool2": "detect_file",
+      "shared_tokens": [
+        "analiza",
+        "texto",
+        "estima",
+        "probabilidad",
+        "que",
+        "haya",
+        "sido",
+        "generado",
+        "por"
+      ],
+      "overlap_pct": 46,
+      "risk": "medium"
+    },
+    {
+      "tool1": "batch_detect_directory",
+      "tool2": "detect_file",
+      "shared_tokens": [
+        "analiza",
+        "los",
+        "archivos",
+        "texto",
+        "que",
+        "por",
+        "archivo"
+      ],
+      "overlap_pct": 44,
+      "risk": "medium"
+    }
+  ],
+  "summary": {
+    "avg_score": 1.8,
+    "tools_with_issues": 4,
+    "total_issues": 12,
+    "critical_issues": 4
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "selected_tool": "batch_detect_directory",
+  "arguments": { "path": "C:/informes", "pattern": "*.txt" },
+  "reasoning": "El usuario quiere analizar todos los archivos .txt de una carpeta a la vez, que es exactamente lo que batch_detect_directory hace en lugar de llamar detect_file repetidamente."
+}

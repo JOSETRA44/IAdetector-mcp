@@ -1,0 +1,245 @@
+{
+  "tool_count": {
+    "count": 4,
+    "grade": "optimal"
+  },
+  "tools": [
+    {
+      "name": "detect_text",
+      "description_preview": "Analiza un texto pegado directamente (no un archivo) y estima la probabilidad de...",
+      "scores": {
+        "descriptionLength": {
+          "score": 3,
+          "chars": 401
+        },
+        "descriptionPattern": {
+          "score": 1,
+          "has": [
+            "action"
+          ]
+        },
+        "paramDescribeCoverage": {
+          "score": 3,
+          "described_pct": 100,
+          "param_count": 2
+        },
+        "schemaSpecificity": {
+          "score": 2
+        },
+        "annotationCoverage": {
+          "score": 2,
+          "annotations": [
+            "openWorldHint",
+            "readOnlyHint"
+          ]
+        },
+        "overall": 2.2
+      },
+      "issues": [
+        "Description does not mention return value",
+        "Description has no disambiguation/negation"
+      ]
+    },
+    {
+      "name": "batch_detect_directory",
+      "description_preview": "Analiza todos los archivos de un directorio que coincidan con un patrón (por def...",
+      "scores": {
+        "descriptionLength": {
+          "score": 3,
+          "chars": 252
+        },
+        "descriptionPattern": {
+          "score": 2,
+          "has": [
+            "action",
+            "returns"
+          ]
+        },
+        "paramDescribeCoverage": {
+          "score": 3,
+          "described_pct": 100,
+          "param_count": 4
+        },
+        "schemaSpecificity": {
+          "score": 3
+        },
+        "annotationCoverage": {
+          "score": 2,
+          "annotations": [
+            "openWorldHint",
+            "readOnlyHint"
+          ]
+        },
+        "overall": 2.6
+      },
+      "issues": [
+        "Description has no disambiguation/negation"
+      ]
+    },
+    {
+      "name": "explain_detection",
+      "description_preview": "Equivalente a detect_text con verbose=true: analiza un texto pegado directamente...",
+      "scores": {
+        "descriptionLength": {
+          "score": 3,
+          "chars": 318
+        },
+        "descriptionPattern": {
+          "score": 1,
+          "has": [
+            "action"
+          ]
+        },
+        "paramDescribeCoverage": {
+          "score": 3,
+          "described_pct": 100,
+          "param_count": 1
+        },
+        "schemaSpecificity": {
+          "score": 0
+        },
+        "annotationCoverage": {
+          "score": 2,
+          "annotations": [
+            "openWorldHint",
+            "readOnlyHint"
+          ]
+        },
+        "overall": 1.8
+      },
+      "issues": [
+        "Description does not mention return value",
+        "Description has no disambiguation/negation",
+        "Parameters lack constraints (enum, pattern, bounds)"
+      ]
+    },
+    {
+      "name": "detect_file",
+      "description_preview": "Analiza el contenido de un archivo de texto local (máximo 5MB) y estima la proba...",
+      "scores": {
+        "descriptionLength": {
+          "score": 3,
+          "chars": 413
+        },
+        "descriptionPattern": {
+          "score": 1,
+          "has": [
+            "action"
+          ]
+        },
+        "paramDescribeCoverage": {
+          "score": 3,
+          "described_pct": 100,
+          "param_count": 2
+        },
+        "schemaSpecificity": {
+          "score": 2
+        },
+        "annotationCoverage": {
+          "score": 2,
+          "annotations": [
+            "openWorldHint",
+            "readOnlyHint"
+          ]
+        },
+        "overall": 2.2
+      },
+      "issues": [
+        "Description does not mention return value",
+        "Description has no disambiguation/negation"
+      ]
+    }
+  ],
+  "sibling_pairs": [
+    {
+      "tool1": "detect_text",
+      "tool2": "explain_detection",
+      "shared_tokens": [
+        "analiza",
+        "texto",
+        "pegado",
+        "directamente",
+        "probabilidad",
+        "ales",
+        "devuelve",
+        "json",
+        "con",
+        "veredicto",
+        "probabilidad",
+        "desglose",
+        "ales",
+        "para",
+        "usa",
+        "detect",
+        "para"
+      ],
+      "overlap_pct": 41,
+      "risk": "medium"
+    },
+    {
+      "tool1": "detect_text",
+      "tool2": "detect_file",
+      "shared_tokens": [
+        "analiza",
+        "texto",
+        "pegado",
+        "directamente",
+        "archivo",
+        "estima",
+        "probabilidad",
+        "que",
+        "haya",
+        "sido",
+        "generado",
+        "por",
+        "ales",
+        "devuelve",
+        "json",
+        "veredicto",
+        "probabilidad",
+        "confianza",
+        "ales",
+        "para",
+        "contenido",
+        "archivo",
+        "usa",
+        "detect",
+        "lugar",
+        "mismo",
+        "para"
+      ],
+      "overlap_pct": 58,
+      "risk": "high"
+    },
+    {
+      "tool1": "explain_detection",
+      "tool2": "detect_file",
+      "shared_tokens": [
+        "detect",
+        "text",
+        "analiza",
+        "texto",
+        "pegado",
+        "directamente",
+        "devuelve",
+        "json",
+        "ales",
+        "veredicto",
+        "para",
+        "veredicto",
+        "probabilidad",
+        "usa",
+        "detect",
+        "text"
+      ],
+      "overlap_pct": 38,
+      "risk": "medium"
+    }
+  ],
+  "summary": {
+    "avg_score": 2.2,
+    "tools_with_issues": 4,
+    "total_issues": 8,
+    "critical_issues": 0
+  }
+}
