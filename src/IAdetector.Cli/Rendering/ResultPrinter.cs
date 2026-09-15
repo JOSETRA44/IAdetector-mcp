@@ -53,6 +53,29 @@ internal static class ResultPrinter
 
             PrintHuman(entry.Path, entry.Result, verbose, noColor);
         }
+
+        PrintSummary(entries);
+    }
+
+    private static void PrintSummary(IReadOnlyList<BatchDetectionEntry> entries)
+    {
+        var errors = entries.Count(e => e.Result is null);
+        var byVerdict = entries
+            .Where(e => e.Result is not null)
+            .GroupBy(e => e.Result!.Verdict)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var parts = Enum.GetValues<Verdict>()
+            .Where(byVerdict.ContainsKey)
+            .Select(v => $"{byVerdict[v]} {v}");
+
+        var summary = string.Join(", ", parts);
+        if (errors > 0)
+        {
+            summary = summary.Length > 0 ? $"{summary}, {errors} error(es)" : $"{errors} error(es)";
+        }
+
+        Console.WriteLine($"Total: {entries.Count} archivo(s) — {summary}");
     }
 
     private static void WriteVerdictLine(DetectionResult result, bool noColor)

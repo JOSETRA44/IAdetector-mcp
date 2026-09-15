@@ -1,4 +1,5 @@
 using System.CommandLine;
+using IAdetector.Cli.Output;
 using IAdetector.Core.Abstractions;
 using IAdetector.Infrastructure.Ml;
 
@@ -8,81 +9,114 @@ internal static class ModelsCommand
 {
     public static Command Create(IModelCache cache, IModelDownloader downloader)
     {
+        return new Command("models", "Gestiona los modelos ONNX descargables.")
+        {
+            CreateList(cache),
+            CreateDownload(cache, downloader),
+        };
+    }
+
+    private static Command CreateList(IModelCache cache)
+    {
+        var command = new Command("list", "Lista los modelos del catálogo y si están descargados.")
+            .WithGlobals();
+
+        command.SetAction(parseResult => Guard.Run(parseResult, "models list", context =>
+        {
+            var renderer = new Renderer(context);
+
+            foreach (var entry in ModelCatalog.Entries.Values)
+            {
+                var downloaded = cache.IsDownloaded(entry.ModelId);
+                renderer.Add(new Row()
+                    .Add("model", entry.ModelId)
+                    .Add("state", downloaded ? "downloaded" : "missing")
+                    .Add("path", downloaded ? cache.GetPath(entry.ModelId) : null)
+                    .Add("display_name", entry.DisplayName));
+            }
+
+            renderer.Finish(new EnvelopeInfo("models list"));
+            return ExitCodes.Ok;
+        }));
+
+        return command;
+    }
+
+    private static Command CreateDownload(IModelCache cache, IModelDownloader downloader)
+    {
         var modelOption = new Option<string>("--model")
         {
             Description = "Id del modelo a descargar.",
             DefaultValueFactory = _ => ModelCatalog.RobertaOpenAiDetector,
         };
-        var forceOption = new Option<bool>("--force") { Description = "Vuelve a descargar aunque ya exista." };
 
-        var downloadCommand = new Command("download", "Descarga un modelo ONNX del catálogo.")
+        var forceOption = new Option<bool>("--force")
+        {
+            Description = "Vuelve a descargar aunque ya exista.",
+        };
+
+        var command = new Command("download", "Descarga un modelo ONNX del catálogo.")
         {
             modelOption,
             forceOption,
         };
 
-        downloadCommand.SetAction(async (parseResult, cancellationToken) =>
+        command.WithGlobals();
+
+        command.SetAction((parseResult, cancellationToken) =>
+            Guard.RunAsync(parseResult, "models download", async context =>
         {
             var modelId = parseResult.GetValue(modelOption) ?? ModelCatalog.RobertaOpenAiDetector;
             var force = parseResult.GetValue(forceOption);
+            var renderer = new Renderer(context);
 
-            if (force)
+            if (force && Directory.Exists(cache.GetPath(modelId)))
             {
-                var existingDir = cache.GetPath(modelId);
-                if (Directory.Exists(existingDir))
-                {
-                    Directory.Delete(existingDir, recursive: true);
-                }
+                Directory.Delete(cache.GetPath(modelId), recursive: true);
             }
             else if (cache.IsDownloaded(modelId))
             {
-                Console.WriteLine($"El modelo '{modelId}' ya está descargado.");
-                return 0;
+                context.Note($"El modelo '{modelId}' ya está descargado.");
+                renderer.Add(new Row()
+                    .Add("model", modelId)
+                    .Add("state", "downloaded")
+                    .Add("path", cache.GetPath(modelId)));
+                renderer.Finish(new EnvelopeInfo("models download") { Cached = true });
+                return ExitCodes.Ok;
             }
 
-            Console.WriteLine($"Descargando '{modelId}'...");
-            var lastReported = -1;
-            var progress = new Progress<double>(p =>
-            {
-                var pct = (int)(p * 100);
-                if (pct == lastReported)
-                {
-                    return;
-                }
+            context.Note($"Descargando '{modelId}'...");
 
-                lastReported = pct;
-                Console.Write($"\r  {pct,3}%");
+            // El progreso va por stderr: es lo único de este comando que no es dato, y en stdout
+            // rompería un `models download -f json | jq`.
+            var lastReported = -1;
+            var progress = new Progress<double>(fraction =>
+            {
+                var percent = (int)(fraction * 100);
+                if (percent != lastReported && !context.Quiet)
+                {
+                    lastReported = percent;
+                    Console.Error.Write($"\r  {percent,3}%");
+                }
             });
 
-            try
-            {
-                var dir = await downloader.EnsureAvailableAsync(modelId, progress, cancellationToken).ConfigureAwait(false);
-                Console.WriteLine();
-                Console.WriteLine($"Modelo descargado en: {dir}");
-                return 0;
-            }
-            catch (Exception ex) when (ex is HttpRequestException or InvalidOperationException or IOException)
-            {
-                Console.WriteLine();
-                Console.Error.WriteLine($"Error al descargar el modelo: {ex.Message}");
-                return 1;
-            }
-        });
+            var directory = await downloader
+                .EnsureAvailableAsync(modelId, progress, cancellationToken)
+                .ConfigureAwait(false);
 
-        var listCommand = new Command("list", "Lista los modelos del catálogo y si están descargados.");
-        listCommand.SetAction(_ =>
-        {
-            foreach (var entry in ModelCatalog.Entries.Values)
+            if (!context.Quiet)
             {
-                var status = cache.IsDownloaded(entry.ModelId) ? "descargado" : "no descargado";
-                Console.WriteLine($"{entry.ModelId,-25} {status,-15} {entry.DisplayName}");
+                Console.Error.WriteLine();
             }
-        });
 
-        return new Command("models", "Gestiona los modelos ONNX descargables.")
-        {
-            downloadCommand,
-            listCommand,
-        };
+            renderer.Add(new Row()
+                .Add("model", modelId)
+                .Add("state", "downloaded")
+                .Add("path", directory));
+            renderer.Finish(new EnvelopeInfo("models download"));
+            return ExitCodes.Ok;
+        }));
+
+        return command;
     }
 }
