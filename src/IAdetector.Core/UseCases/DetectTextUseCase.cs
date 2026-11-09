@@ -59,6 +59,10 @@ public sealed class DetectTextUseCase(
             ? await AnalyzeSingleAsync(sample, cancellationToken).ConfigureAwait(false)
             : await AnalyzeChunkedAsync(sample, cancellationToken).ConfigureAwait(false);
 
+        // El idioma viaja con el resultado (y con la copia cacheada): la calibración es de
+        // inglés y los consumidores deben poder avisar cuando el texto no lo es.
+        result = result with { DetectedLanguage = LanguageDetector.Detect(sample) };
+
         if (cache is not null && cacheMode != DetectionCacheMode.Disabled)
         {
             await cache.SetAsync(text, result, cancellationToken).ConfigureAwait(false);

@@ -60,6 +60,20 @@ public class DetectionToolsTests
     }
 
     [Fact]
+    public async Task ExplainDetection_SpanishText_CarriesLanguageAndWarning()
+    {
+        const string spanish =
+            "El zorro marrón salta sobre el perro mientras el granjero observa el campo, y la "
+            + "gente del pueblo comenta que es una escena de lo más curiosa para un día de mercado.";
+
+        var json = await BuildTools().ExplainDetection(spanish);
+
+        using var doc = JsonDocument.Parse(json);
+        Assert.Equal("Spanish", doc.RootElement.GetProperty("language").GetString());
+        Assert.True(doc.RootElement.GetProperty("warnings").GetArrayLength() > 0);
+    }
+
+    [Fact]
     public async Task CompareVersions_EmptyText_Throws()
     {
         await Assert.ThrowsAsync<McpException>(() => BuildTools().CompareVersions("", TinyText));

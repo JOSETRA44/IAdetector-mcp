@@ -9,6 +9,14 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **Detección de idioma y aviso de fiabilidad en español** (Fase 3, ver
+  `docs/SPANISH.md`): `DetectionResult` lleva `detectedLanguage` (detector por
+  palabras funcionales, ES/EN/Unknown) y `explain_detection` incluye `language` y
+  `warnings`. La medición con un corpus en español (21 humanos de dominio público +
+  18 textos de IA; `scripts/calibration/data/es/`) mostró que el fallo en español no
+  son los falsos positivos sino la ceguera: los modelos ONNX ingleses puntúan ≈0 todo
+  texto en español y 0/18 textos de IA fueron detectados. Sin cambios de coeficientes:
+  la corrección es la calibración de un perfil en español (decisión documentada).
 - **Bucle de reescritura para agentes** (Fase 2, ver `docs/AGENT_LOOP.md`):
   `explain_detection` es ahora prescriptivo — por señal: si midió, contribución real al
   logit (β × puntuación), rango humano de referencia (percentiles del corpus de

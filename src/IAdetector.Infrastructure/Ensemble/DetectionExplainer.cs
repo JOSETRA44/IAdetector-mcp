@@ -75,8 +75,35 @@ public sealed class DetectionExplainer : IDetectionExplainer
             result.Signals.Count(s => s.HasData),
             result.Signals.Count,
             diagnostics,
-            actions);
+            actions,
+            result.DetectedLanguage,
+            BuildWarnings(result.DetectedLanguage));
     }
+
+    /// <summary>
+    /// Avisos de fiabilidad por idioma, basados en la medición de la Fase 3
+    /// (docs/SPANISH.md): en español el problema medido no son los falsos positivos,
+    /// sino la ceguera — los dos modelos ONNX son de inglés y puntúan ~0 tanto el
+    /// texto humano como el de IA en español, así que un veredicto «humano» en
+    /// español no distingue nada hoy.
+    /// </summary>
+    private static IReadOnlyList<string> BuildWarnings(TextLanguage language) => language switch
+    {
+        TextLanguage.Spanish =>
+        [
+            "Texto en español: la calibración del ensemble es de inglés (HC3) y los dos modelos "
+            + "ONNX también. Medido en la Fase 3 (docs/SPANISH.md): en español ambos modelos "
+            + "puntúan ≈0 tanto para texto humano como para texto de IA, así que el detector "
+            + "apenas detecta IA en español y un veredicto «humano» aquí NO es fiable. Las "
+            + "señales estadísticas sí miden, pero su peso calibrado no basta para compensarlo.",
+        ],
+        TextLanguage.Unknown =>
+        [
+            "No se pudo identificar el idioma del texto; la calibración del ensemble es de "
+            + "inglés, así que si el texto no está en inglés el resultado es menos fiable.",
+        ],
+        _ => [],
+    };
 
     private SignalDiagnostic Diagnose(SignalScore signal)
     {

@@ -26,7 +26,7 @@ public sealed record CachedDetectionEntry(string Version, DateTimeOffset Fetched
 [JsonSourceGenerationOptions(
     WriteIndented = true,
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
-    Converters = [typeof(JsonStringEnumConverter<Verdict>)])]
+    Converters = [typeof(JsonStringEnumConverter<Verdict>), typeof(JsonStringEnumConverter<TextLanguage>)])]
 [JsonSerializable(typeof(DetectionResult))]
 [JsonSerializable(typeof(DetectionExplanation))]
 [JsonSerializable(typeof(VersionComparison))]
