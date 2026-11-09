@@ -60,4 +60,6 @@ public sealed record DetectionExplanation(
     int SignalsWithData,
     int SignalsTotal,
     IReadOnlyList<SignalDiagnostic> Signals,
-    IReadOnlyList<string> PrioritizedActions);
+    IReadOnlyList<string> PrioritizedActions,
+    TextLanguage Language,
+    IReadOnlyList<string> Warnings);

@@ -25,6 +25,8 @@ public class CompareVersionsUseCaseTests
                 s.Name, s.HasData, s.RawValue, s.NormalizedScore,
                 Coefficient: 1.0, LogitContribution: s.NormalizedScore,
                 new HumanRange(0.0, 0.5, 1.0, 100), SignalStatus.InHumanRange, string.Empty)).ToList(),
+            [],
+            result.DetectedLanguage,
             []);
     }
 

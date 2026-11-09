@@ -9,4 +9,5 @@ public sealed record DetectionResult(
     double AiProbability,
     double Confidence,
     IReadOnlyList<SignalScore> Signals,
-    ChunkInfo? ChunkInfo = null);
+    ChunkInfo? ChunkInfo = null,
+    TextLanguage DetectedLanguage = TextLanguage.Unknown);

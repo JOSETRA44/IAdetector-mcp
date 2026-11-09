@@ -76,6 +76,31 @@ public class DetectionExplainerTests
     }
 
     [Fact]
+    public void Explain_SpanishResult_WarnsThatHumanVerdictIsUnreliable()
+    {
+        var result = new DetectionResult(
+            Verdict.LikelyHuman, 0.1, 0.8,
+            [new SignalScore("burstiness", 0.3, 0.4, 1.0, "")],
+            ChunkInfo: null, DetectedLanguage: TextLanguage.Spanish);
+
+        var explanation = Explainer().Explain(result);
+
+        Assert.Equal(TextLanguage.Spanish, explanation.Language);
+        Assert.Contains(explanation.Warnings, w => w.Contains("NO es fiable"));
+    }
+
+    [Fact]
+    public void Explain_EnglishResult_NoLanguageWarnings()
+    {
+        var result = new DetectionResult(
+            Verdict.LikelyHuman, 0.1, 0.8,
+            [new SignalScore("burstiness", 0.3, 0.4, 1.0, "")],
+            ChunkInfo: null, DetectedLanguage: TextLanguage.English);
+
+        Assert.Empty(Explainer().Explain(result).Warnings);
+    }
+
+    [Fact]
     public void Explain_SignalWithoutWeights_NullContributionButStillDiagnosed()
     {
         var explanation = Explainer().Explain(ResultWith(
