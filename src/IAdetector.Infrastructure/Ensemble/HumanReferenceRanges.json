@@ -1,0 +1,47 @@
+{
+  "source": "HC3 wiki_csai, respuestas humanas con datos por señal (features.csv, Fase 1.2)",
+  "ranges": {
+    "burstiness": {
+      "p10": 0.249172,
+      "median": 0.584225,
+      "p90": 0.868359,
+      "samples": 599
+    },
+    "type-token-ratio": {
+      "p10": 0.0,
+      "median": 0.121615,
+      "p90": 0.427083,
+      "samples": 66
+    },
+    "lexical-entropy": {
+      "p10": 0.0,
+      "median": 0.0,
+      "p90": 0.064145,
+      "samples": 66
+    },
+    "compression-ratio": {
+      "p10": 0.0,
+      "median": 0.0,
+      "p90": 0.019689,
+      "samples": 167
+    },
+    "ngram-repetition": {
+      "p10": 0.0,
+      "median": 0.0,
+      "p90": 0.156286,
+      "samples": 344
+    },
+    "onnx-classifier": {
+      "p10": 0.00018,
+      "median": 0.000267,
+      "p90": 0.132354,
+      "samples": 838
+    },
+    "perplexity": {
+      "p10": 0.0,
+      "median": 0.155009,
+      "p90": 0.452871,
+      "samples": 838
+    }
+  }
+}

@@ -14,7 +14,8 @@ Para soportar más plataformas, edita `<RuntimeIdentifiers />` en el `.csproj`.
 - `detect_text(text, verbose)` — analiza un texto inline (máx. 20 000 caracteres).
 - `detect_file(path, verbose)` — analiza un archivo local (máx. 5MB).
 - `batch_detect_directory(path, pattern, recursive, maxFiles)` — analiza varios archivos de un directorio.
-- `explain_detection(text)` — como `detect_text` pero siempre con el desglose completo de señales.
+- `explain_detection(text)` — explicación prescriptiva por señal (contribución al logit, rango humano de referencia, guía de reescritura) con acciones priorizadas.
+- `compare_versions(originalText, rewrittenText)` — compara original y reescritura sin estado, con salvaguarda de significado; ver `docs/AGENT_LOOP.md` en la raíz del repo.
 
 Ninguna de estas tools llama a un servicio externo. El clasificador ONNX y la señal de perplexity requieren haber descargado sus modelos primero (ver `iadetector models download` en el paquete CLI, `IAdetector.Cli`); si no están descargados, esas señales quedan neutrales y el resto del ensemble sigue funcionando normalmente.
 

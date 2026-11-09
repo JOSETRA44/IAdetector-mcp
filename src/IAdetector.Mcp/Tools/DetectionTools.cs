@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Text.Json;
+using IAdetector.Core.Abstractions;
 using IAdetector.Core.Domain;
 using IAdetector.Core.UseCases;
 using IAdetector.Infrastructure.Serialization;
@@ -14,7 +15,11 @@ namespace IAdetector.Mcp.Tools;
 /// las señales estadísticas cuando el modelo correspondiente esté descargado.
 /// </summary>
 [McpServerToolType]
-public sealed class DetectionTools(DetectTextUseCase detectText, BatchDetectUseCase batchDetect)
+public sealed class DetectionTools(
+    DetectTextUseCase detectText,
+    BatchDetectUseCase batchDetect,
+    IDetectionExplainer explainer,
+    CompareVersionsUseCase compareVersions)
 {
     private const int MaxInlineTextLength = 20_000;
     private const long MaxFileSizeBytes = 5 * 1024 * 1024;
@@ -100,11 +105,50 @@ public sealed class DetectionTools(DetectTextUseCase detectText, BatchDetectUseC
     }
 
     [McpServerTool(Name = "explain_detection", ReadOnly = true, OpenWorld = false)]
-    [Description("Equivalente a detect_text con verbose=true: analiza un texto pegado directamente y siempre devuelve el JSON con el desglose completo de señales y su explicación en lenguaje natural. Úsala cuando el usuario pida explícitamente el porqué de un veredicto; para el uso normal (solo veredicto/probabilidad) usa detect_text.")]
-    public Task<string> ExplainDetection(
+    [Description("Explicación PRESCRIPTIVA de una detección, pensada para iterar reescribiendo: por cada señal devuelve si midió (hasData), su puntuación, cuánto empuja el resultado (logitContribution = coeficiente calibrado × puntuación; ordena por ahí para saber qué atacar primero), el rango típico en texto humano de referencia (percentiles 10/50/90 del corpus de calibración) con su estado (en rango / más de IA que el rango humano / sin datos) y, cuando está fuera de rango, qué cambiar en la reescritura. Incluye prioritizedActions con las señales fuera de rango ordenadas por contribución. Los rangos son del corpus HC3 (inglés): una referencia para este detector, no una verdad universal. Para comparar una reescritura ya hecha con su original usa compare_versions.")]
+    public async Task<string> ExplainDetection(
         [Description("Texto a analizar (máximo 20000 caracteres).")] string text,
         CancellationToken cancellationToken = default)
-        => DetectText(text, verbose: true, cancellationToken);
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new McpException("El texto no puede estar vacío.");
+        }
+
+        if (text.Length > MaxInlineTextLength)
+        {
+            throw new McpException(
+                $"El texto excede el límite de {MaxInlineTextLength} caracteres para análisis inline ({text.Length} recibidos). Usa 'detect_file' para archivos largos.");
+        }
+
+        var result = await detectText.DetectAsync(text, cancellationToken).ConfigureAwait(false);
+        var explanation = explainer.Explain(result);
+        return JsonSerializer.Serialize(explanation, IAdetectorJsonContext.Default.DetectionExplanation);
+    }
+
+    [McpServerTool(Name = "compare_versions", ReadOnly = true, OpenWorld = false)]
+    [Description("Compara un texto original con su reescritura (sin guardar estado: pasa ambas en cada llamada). Devuelve las dos detecciones, deltaProbability, el cambio por señal con su contribución al logit, y outcome: mejora / empeora / sin_cambio / no_concluyente. Salvaguarda anti-optimización-vacía: la similitud léxica de contenido (palabras de ≥4 letras compartidas) debe ser ≥ 0,5; si la reescritura pierde vocabulario del original, el outcome es no_concluyente aunque la probabilidad baje, porque el texto puede haber perdido su significado. Úsala en cada iteración de un bucle de reescritura para decidir el siguiente paso con explain_detection.")]
+    public async Task<string> CompareVersions(
+        [Description("Texto original (máximo 20000 caracteres).")] string originalText,
+        [Description("Texto reescrito (máximo 20000 caracteres).")] string rewrittenText,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(originalText) || string.IsNullOrWhiteSpace(rewrittenText))
+        {
+            throw new McpException("Ninguna de las dos versiones puede estar vacía.");
+        }
+
+        if (originalText.Length > MaxInlineTextLength || rewrittenText.Length > MaxInlineTextLength)
+        {
+            throw new McpException(
+                $"Cada versión está limitada a {MaxInlineTextLength} caracteres (original: {originalText.Length}, reescritura: {rewrittenText.Length}).");
+        }
+
+        var comparison = await compareVersions
+            .CompareAsync(originalText, rewrittenText, cancellationToken)
+            .ConfigureAwait(false);
+        return JsonSerializer.Serialize(comparison, IAdetectorJsonContext.Default.VersionComparison);
+    }
 
     private static string Serialize(DetectionResult result, bool verbose) =>
         JsonSerializer.Serialize(DetectionResultProjection.Apply(result, verbose), IAdetectorJsonContext.Default.DetectionResult);

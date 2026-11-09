@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using IAdetector.Core.Domain;
 using IAdetector.Core.UseCases;
 using IAdetector.Infrastructure.Ensemble;
+using HumanReferenceRangesFile = IAdetector.Infrastructure.Ensemble.HumanReferenceRangesFile;
 
 namespace IAdetector.Infrastructure.Serialization;
 
@@ -27,6 +28,9 @@ public sealed record CachedDetectionEntry(string Version, DateTimeOffset Fetched
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     Converters = [typeof(JsonStringEnumConverter<Verdict>)])]
 [JsonSerializable(typeof(DetectionResult))]
+[JsonSerializable(typeof(DetectionExplanation))]
+[JsonSerializable(typeof(VersionComparison))]
+[JsonSerializable(typeof(HumanReferenceRangesFile))]
 [JsonSerializable(typeof(List<BatchDetectionEntry>))]
 [JsonSerializable(typeof(NoFilesFoundMessage))]
 [JsonSerializable(typeof(CachedDetectionEntry))]

@@ -39,6 +39,8 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<DetectTextUseCase>();
         services.AddSingleton<BatchDetectUseCase>();
+        services.AddSingleton<IDetectionExplainer, DetectionExplainer>();
+        services.AddSingleton<CompareVersionsUseCase>();
 
         return services;
     }
