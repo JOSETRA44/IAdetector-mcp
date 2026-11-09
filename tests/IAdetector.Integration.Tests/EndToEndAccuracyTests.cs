@@ -19,27 +19,25 @@ public class EndToEndAccuracyTests
     private const int MaxQuestions = 150;
     private const double MinAcceptableAccuracy = 0.80;
 
-    [Fact]
+    [SkippableFact]
     public async Task DetectAsync_HeldOutHc3Subset_MeetsMinimumAccuracy()
     {
+        // Omisión explícita con motivo (Xunit.SkippableFact): antes esto era un return
+        // silencioso y la prueba contaba como superada sin haber medido nada.
         var datasetPath = FindDatasetPath();
-        if (datasetPath is null)
-        {
-            return;
-        }
+        Skip.If(datasetPath is null, "Dataset held-out (scripts/calibration/data/open_qa.jsonl) no encontrado localmente.");
 
         var cache = new FileSystemModelCache();
-        if (!cache.IsDownloaded(ModelCatalog.RobertaOpenAiDetector) || !cache.IsDownloaded(ModelCatalog.DistilGpt2Perplexity))
-        {
-            return;
-        }
+        Skip.If(
+            !cache.IsDownloaded(ModelCatalog.RobertaOpenAiDetector) || !cache.IsDownloaded(ModelCatalog.DistilGpt2Perplexity),
+            "Modelos ONNX no descargados localmente (roberta-openai-detector, distilgpt2-perplexity).");
 
         var services = new ServiceCollection();
         services.AddIAdetectorInfrastructure();
         using var provider = services.BuildServiceProvider();
         var detectText = provider.GetRequiredService<DetectTextUseCase>();
 
-        var samples = LoadSamples(datasetPath, MaxQuestions);
+        var samples = LoadSamples(datasetPath!, MaxQuestions);
         Assert.True(samples.Count > 0, "No se pudo cargar ninguna muestra del dataset held-out.");
 
         var correct = 0;

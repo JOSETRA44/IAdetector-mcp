@@ -7,7 +7,21 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- **Evaluación de calibración con trazabilidad** (`docs/CALIBRATION.md`): la herramienta
+  de extracción vuelca `question_id`, `source` y `<señal>_hasdata` por fila, con números
+  en cultura invariante, y el script de ajuste evalúa con GroupKFold por pregunta
+  reportando accuracy, Brier, ECE y AUROC. Resultado de la reevaluación 2026-11-09:
+  accuracy agrupada 0,9697 (la validación por filas no inflaba la cifra en este dataset),
+  cobertura medida por señal (riqueza léxica y entropía solo miden el 3,9% de las
+  respuestas de HC3) y coeficientes de producción confirmados sin cambios.
+
 ### Fixed
+
+- **La prueba de integración ya no «pasa» en silencio**: sin dataset held-out o sin los
+  modelos ONNX descargados se omite con su motivo (`Xunit.SkippableFact`) en vez de
+  contar como superada sin haber medido nada.
 
 - **Evidencia insuficiente ya no produce veredicto.** `SignalScore` declara ahora si la
   señal midió el texto de verdad (`HasData`): texto demasiado corto, modelo ONNX no
