@@ -9,15 +9,22 @@ internal static class EnsembleMath
     // para normalizar la confianza a [0,1].
     private const double MaxExpectedStdev = 0.5;
 
-    /// <summary>Confianza = qué tan de acuerdo están las señales entre sí (1 - dispersión ponderada respecto a la media).</summary>
-    public static double ComputeConfidence(IReadOnlyList<SignalScore> scores, double totalWeight, double aiProbability)
+    /// <summary>
+    /// Confianza = qué tan de acuerdo están las señales entre sí (1 - dispersión ponderada
+    /// respecto a la media ponderada de las propias señales). La dispersión se mide contra
+    /// esa media, no contra la probabilidad final: la sigmoide es no lineal, así que medir
+    /// contra ella castigaba la confianza precisamente cuando las señales más coincidían
+    /// en un extremo (todas en 0.85 dan P≈0.99 y parecían «dispersas» respecto a 0.99).
+    /// </summary>
+    public static double ComputeConfidence(IReadOnlyList<SignalScore> scores, double totalWeight)
     {
         if (totalWeight <= 0)
         {
             return 0.0;
         }
 
-        var variance = scores.Sum(s => s.Weight * Math.Pow(s.NormalizedScore - aiProbability, 2)) / totalWeight;
+        var weightedMean = scores.Sum(s => s.Weight * s.NormalizedScore) / totalWeight;
+        var variance = scores.Sum(s => s.Weight * Math.Pow(s.NormalizedScore - weightedMean, 2)) / totalWeight;
         var stdev = Math.Sqrt(variance);
         return Math.Clamp(1.0 - (stdev / MaxExpectedStdev), 0.0, 1.0);
     }

@@ -35,14 +35,14 @@ public sealed class DistilGpt2PerplexityAnalyzer(IModelCache cache) : ISignalAna
         {
             return new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                $"Modelo '{ModelCatalog.DistilGpt2Perplexity}' no descargado. Ejecuta 'iadetector models download --model {ModelCatalog.DistilGpt2Perplexity}' para activar esta señal.");
+                $"Modelo '{ModelCatalog.DistilGpt2Perplexity}' no descargado. Ejecuta 'iadetector models download --model {ModelCatalog.DistilGpt2Perplexity}' para activar esta señal.", HasData: false);
         }
 
         if (sample.WordCount < MinWords)
         {
             return new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                $"Muy pocas palabras ({sample.WordCount}) para medir perplexity de forma confiable.");
+                $"Muy pocas palabras ({sample.WordCount}) para medir perplexity de forma confiable.", HasData: false);
         }
 
         var perplexity = await Task.Run(() => ComputePerplexity(sample.Text), cancellationToken).ConfigureAwait(false);

@@ -29,14 +29,14 @@ public sealed class OnnxSignalAnalyzer(IModelCache cache, IOnnxClassifier classi
         {
             return new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                $"Modelo '{classifier.ModelId}' no descargado. Ejecuta 'iadetector models download' para activar esta señal.");
+                $"Modelo '{classifier.ModelId}' no descargado. Ejecuta 'iadetector models download' para activar esta señal.", HasData: false);
         }
 
         if (sample.WordCount < MinWords)
         {
             return new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                $"Muy pocas palabras ({sample.WordCount}) para que el clasificador sea confiable.");
+                $"Muy pocas palabras ({sample.WordCount}) para que el clasificador sea confiable.", HasData: false);
         }
 
         var aiProbability = await classifier.ClassifyAsync(sample.Text, cancellationToken).ConfigureAwait(false);

@@ -7,6 +7,19 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- **Evidencia insuficiente ya no produce veredicto.** `SignalScore` declara ahora si la
+  señal midió el texto de verdad (`HasData`): texto demasiado corto, modelo ONNX no
+  descargado o idioma no soportado devuelven el 0.5 convencional de «sin datos» marcado
+  como tal. Si ninguna señal tiene datos, el ensemble devuelve `Mixed`, probabilidad 0.5
+  y confianza 0, en vez del «probablemente humano» con ≈78% de confianza que producía el
+  intercept calibrado sobre puros 0.5 imputados (un texto vacío salía «humano»).
+- **La confianza mide el acuerdo real entre señales.** La dispersión se calcula contra la
+  media ponderada de las señales, como decía la documentación, y no contra la probabilidad
+  sigmoide final, que castigaba la confianza justo cuando las señales coincidían en un
+  extremo.
+
 ## [0.1.0-beta] - 2026-08-22
 
 ### Added

@@ -26,7 +26,7 @@ public sealed class CompressionRatioAnalyzer : ISignalAnalyzer
         {
             return Task.FromResult(new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                $"Texto demasiado corto ({originalBytes} bytes) para un ratio de compresión confiable."));
+                $"Texto demasiado corto ({originalBytes} bytes) para un ratio de compresión confiable.", HasData: false));
         }
 
         var compressedBytes = Compress(sample.Text);

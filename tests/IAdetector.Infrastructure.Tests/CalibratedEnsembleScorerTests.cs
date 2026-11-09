@@ -82,6 +82,61 @@ public class CalibratedEnsembleScorerTests
     }
 
     [Fact]
+    public void Combine_AllSignalsWithoutData_ReturnsNeutralMixedWithZeroConfidence()
+    {
+        // Regresión: con los modelos ONNX sin descargar o un texto demasiado corto, todas
+        // las señales devuelven el 0.5 convencional de «sin datos». Antes el ensemble lo
+        // convertía en «probablemente humano» con confianza ≈0.78; sin evidencia no debe
+        // haber veredicto, igual que cuando no llega ninguna señal.
+        var sut = new CalibratedEnsembleScorer();
+        var scores = new[]
+        {
+            new SignalScore("burstiness", 0.0, 0.5, 0.2, "sin datos", HasData: false),
+            new SignalScore("onnx-classifier", 0.0, 0.5, 0.4, "modelo no descargado", HasData: false),
+            new SignalScore("perplexity", 0.0, 0.5, 0.4, "modelo no descargado", HasData: false),
+        };
+
+        var result = sut.Combine(_sample, scores);
+
+        Assert.Equal(Verdict.Mixed, result.Verdict);
+        Assert.Equal(0.5, result.AiProbability);
+        Assert.Equal(0.0, result.Confidence);
+    }
+
+    [Fact]
+    public void Combine_OneSignalWithDataAmongUnavailable_StillProducesVerdict()
+    {
+        var sut = new CalibratedEnsembleScorer(TestWeights);
+        var scores = new[]
+        {
+            new SignalScore("a", 1.0, 1.0, 1.0, "medido"),
+            new SignalScore("a", 0.0, 0.5, 0.2, "sin datos", HasData: false),
+        };
+
+        var result = sut.Combine(_sample, scores);
+
+        Assert.Equal(Verdict.AI, result.Verdict);
+    }
+
+    [Fact]
+    public void Combine_AgreeingSignalsAtExtreme_YieldFullConfidence()
+    {
+        // Regresión: la dispersión se mide contra la media de las señales, no contra la
+        // probabilidad sigmoide. Dos señales que coinciden exactamente tienen dispersión
+        // cero y confianza plena, aunque la probabilidad final sea extrema.
+        var sut = new CalibratedEnsembleScorer(TestWeights);
+        var scores = new[]
+        {
+            new SignalScore("a", 0.85, 0.85, 1.0, "x"),
+            new SignalScore("a", 0.85, 0.85, 1.0, "y"),
+        };
+
+        var result = sut.Combine(_sample, scores);
+
+        Assert.Equal(1.0, result.Confidence, precision: 6);
+    }
+
+    [Fact]
     public void Combine_NoScores_ReturnsNeutralMixedWithZeroConfidence()
     {
         var sut = new CalibratedEnsembleScorer(TestWeights);

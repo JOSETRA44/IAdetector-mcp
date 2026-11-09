@@ -22,7 +22,7 @@ public sealed class TypeTokenRatioAnalyzer : ISignalAnalyzer
         {
             return Task.FromResult(new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                $"Muy pocas palabras ({sample.WordCount}) para un TTR confiable."));
+                $"Muy pocas palabras ({sample.WordCount}) para un TTR confiable.", HasData: false));
         }
 
         var distinctWords = sample.Words

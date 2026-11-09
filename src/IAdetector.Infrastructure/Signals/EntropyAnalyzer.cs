@@ -27,7 +27,7 @@ public sealed class EntropyAnalyzer : ISignalAnalyzer
         {
             return Task.FromResult(new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                $"Muy pocas palabras o vocabulario degenerado ({sample.WordCount} palabras, {frequencies.Count} distintas)."));
+                $"Muy pocas palabras o vocabulario degenerado ({sample.WordCount} palabras, {frequencies.Count} distintas).", HasData: false));
         }
 
         var total = (double)sample.WordCount;

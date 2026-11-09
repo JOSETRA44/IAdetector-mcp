@@ -26,8 +26,12 @@ public sealed class CalibratedEnsembleScorer : IEnsembleScorer
 
     public DetectionResult Combine(TextSample sample, IReadOnlyList<SignalScore> scores, ChunkInfo? chunkInfo = null)
     {
-        if (scores.Count == 0)
+        if (scores.Count == 0 || scores.All(s => !s.HasData))
         {
+            // Sin evidencia no hay veredicto: antes, con todas las señales en el 0.5
+            // convencional de «sin datos» (modelos ONNX no descargados o texto demasiado
+            // corto), el intercept calibrado producía ≈0.39 de probabilidad con ≈0.78 de
+            // confianza — un texto vacío salía «probablemente humano» con confianza alta.
             return new DetectionResult(Verdict.Mixed, 0.5, 0.0, scores, chunkInfo);
         }
 
@@ -42,7 +46,7 @@ public sealed class CalibratedEnsembleScorer : IEnsembleScorer
 
         var aiProbability = Sigmoid(z);
         var totalWeight = scores.Sum(s => s.Weight);
-        var confidence = EnsembleMath.ComputeConfidence(scores, totalWeight, aiProbability);
+        var confidence = EnsembleMath.ComputeConfidence(scores, totalWeight);
         var verdict = EnsembleMath.DetermineVerdict(aiProbability);
 
         return new DetectionResult(verdict, aiProbability, confidence, scores, chunkInfo);
