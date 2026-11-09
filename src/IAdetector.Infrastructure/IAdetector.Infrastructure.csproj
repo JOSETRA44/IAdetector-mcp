@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Ensemble\EnsembleWeights.json" />
+    <EmbeddedResource Include="Ensemble\HumanReferenceRanges.json" />
   </ItemGroup>
 
   <ItemGroup>

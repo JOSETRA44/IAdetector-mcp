@@ -149,7 +149,8 @@ iadetector models list
 - `detect_text(text, verbose)` — texto inline (máx. 20 000 caracteres).
 - `detect_file(path, verbose)` — archivo local (máx. 5MB; fragmenta automáticamente textos largos, muestreando si son muy grandes).
 - `batch_detect_directory(path, pattern, recursive, maxFiles)` — varios archivos a la vez.
-- `explain_detection(text)` — como `detect_text` pero siempre con el desglose completo de señales.
+- `explain_detection(text)` — explicación prescriptiva: por señal, si midió, cuánto empuja el resultado (contribución al logit), su rango típico en texto humano de referencia y qué cambiar si está fuera de rango, con acciones priorizadas.
+- `compare_versions(originalText, rewrittenText)` — compara una reescritura con su original (sin estado): cambio de probabilidad y por señal, con salvaguarda de significado (si la reescritura pierde el vocabulario de contenido del original, el resultado es `no_concluyente` aunque la probabilidad baje). Ver `docs/AGENT_LOOP.md`.
 
 ## Skills para agentes (Claude Code)
 

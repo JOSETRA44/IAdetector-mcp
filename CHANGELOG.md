@@ -9,6 +9,14 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **Bucle de reescritura para agentes** (Fase 2, ver `docs/AGENT_LOOP.md`):
+  `explain_detection` es ahora prescriptivo — por señal: si midió, contribución real al
+  logit (β × puntuación), rango humano de referencia (percentiles del corpus de
+  calibración, generados por `scripts/calibration/make_reference_ranges.py`) y guía de
+  reescritura cuando está fuera de rango, con acciones priorizadas — y la nueva tool
+  **`compare_versions`** compara original y reescritura sin estado, con salvaguarda de
+  significado (similitud léxica de contenido < 0,5 ⇒ `no_concluyente`). Nuevo proyecto
+  de pruebas `IAdetector.Mcp.Tests`; 16 pruebas nuevas entre Core, Infrastructure y MCP.
 - **Evaluación de calibración con trazabilidad** (`docs/CALIBRATION.md`): la herramienta
   de extracción vuelca `question_id`, `source` y `<señal>_hasdata` por fila, con números
   en cultura invariante, y el script de ajuste evalúa con GroupKFold por pregunta
