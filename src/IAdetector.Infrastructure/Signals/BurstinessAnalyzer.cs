@@ -24,7 +24,7 @@ public sealed class BurstinessAnalyzer : ISignalAnalyzer
         {
             return Task.FromResult(new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                $"Muy pocas oraciones ({sample.SentenceCount}) para medir burstiness de forma confiable."));
+                $"Muy pocas oraciones ({sample.SentenceCount}) para medir burstiness de forma confiable.", HasData: false));
         }
 
         var lengths = sample.Sentences
@@ -40,7 +40,7 @@ public sealed class BurstinessAnalyzer : ISignalAnalyzer
         {
             return Task.FromResult(new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                "Longitud de oración degenerada (todas vacías)."));
+                "Longitud de oración degenerada (todas vacías).", HasData: false));
         }
 
         var burstiness = (stdev - mean) / (stdev + mean);

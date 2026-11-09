@@ -17,6 +17,7 @@ public class BurstinessAnalyzerTests
 
         Assert.Equal(0.5, score.NormalizedScore);
         Assert.True(score.Weight < 1.0);
+        Assert.False(score.HasData);
     }
 
     [Fact]

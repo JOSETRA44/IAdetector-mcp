@@ -21,7 +21,7 @@ public sealed class NGramRepetitionAnalyzer : ISignalAnalyzer
         {
             return Task.FromResult(new SignalScore(
                 Name, 0.0, 0.5, Weight * ScoreNormalization.InsufficientDataWeightFactor,
-                $"Muy pocas palabras ({sample.WordCount}) para medir repetición de trigramas."));
+                $"Muy pocas palabras ({sample.WordCount}) para medir repetición de trigramas.", HasData: false));
         }
 
         var words = sample.Words.Select(w => w.ToLowerInvariant()).ToList();

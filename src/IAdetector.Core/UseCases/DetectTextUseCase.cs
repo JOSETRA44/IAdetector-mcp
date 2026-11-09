@@ -160,7 +160,8 @@ public sealed class DetectTextUseCase(
                     weightedRaw,
                     weightedNorm,
                     weightedWeight,
-                    $"Promedio ponderado sobre {g.Count()} fragmentos.");
+                    $"Promedio ponderado sobre {g.Count()} fragmentos.",
+                    HasData: g.Any(x => x.Score.HasData));
             })
             .ToList();
     }
