@@ -1,0 +1,29 @@
+{
+  "source": "HC3 wiki_csai, respuestas humanas con datos por señal (features.csv, Fase 1.2)",
+  "ranges": {
+    "burstiness": {
+      "p10": 0.091331,
+      "median": 0.422155,
+      "p90": 0.760462,
+      "samples": 268
+    },
+    "ngram-repetition": {
+      "p10": 0.0,
+      "median": 0.0,
+      "p90": 0.043104,
+      "samples": 334
+    },
+    "onnx-classifier": {
+      "p10": 0.000178,
+      "median": 0.000233,
+      "p90": 0.000299,
+      "samples": 336
+    },
+    "perplexity": {
+      "p10": 0.0,
+      "median": 0.0,
+      "p90": 0.0,
+      "samples": 336
+    }
+  }
+}

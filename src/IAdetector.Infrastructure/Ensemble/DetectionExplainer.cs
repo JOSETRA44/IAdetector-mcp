@@ -20,6 +20,8 @@ public sealed class DetectionExplainer : IDetectionExplainer
 {
     private readonly EnsembleWeightsData _weights;
     private readonly IReadOnlyDictionary<string, HumanRange> _ranges;
+    private readonly EnsembleWeightsData _spanishWeights;
+    private readonly IReadOnlyDictionary<string, HumanRange> _spanishRanges;
 
     /// <summary>Guía de reescritura por señal cuando su puntuación supera el rango humano.</summary>
     private static readonly IReadOnlyDictionary<string, string> Guidance = new Dictionary<string, string>
@@ -44,22 +46,41 @@ public sealed class DetectionExplainer : IDetectionExplainer
     private const string NoDataRecommendation =
         "Sin datos: esta señal no pudo medir el texto (demasiado corto para ella o modelo no descargado); no la uses para decidir.";
 
+    private const string EnglishRangesResource = "IAdetector.Infrastructure.Ensemble.HumanReferenceRanges.json";
+    private const string SpanishRangesResource = "IAdetector.Infrastructure.Ensemble.HumanReferenceRangesEs.json";
+
     public DetectionExplainer()
-        : this(EnsembleWeightsResource.Load(), LoadRanges())
+        : this(
+            EnsembleWeightsResource.Load(), LoadRanges(EnglishRangesResource),
+            EnsembleWeightsResource.LoadSpanish(), LoadRanges(SpanishRangesResource))
     {
     }
 
+    /// <summary>Un solo perfil para ambos idiomas (tests).</summary>
     public DetectionExplainer(EnsembleWeightsData weights, IReadOnlyDictionary<string, HumanRange> ranges)
+        : this(weights, ranges, weights, ranges)
+    {
+    }
+
+    public DetectionExplainer(
+        EnsembleWeightsData weights, IReadOnlyDictionary<string, HumanRange> ranges,
+        EnsembleWeightsData spanishWeights, IReadOnlyDictionary<string, HumanRange> spanishRanges)
     {
         _weights = weights;
         _ranges = ranges;
+        _spanishWeights = spanishWeights;
+        _spanishRanges = spanishRanges;
     }
 
     public DetectionExplanation Explain(DetectionResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
 
-        var diagnostics = result.Signals.Select(Diagnose).ToList();
+        // Las contribuciones y los rangos deben ser los del perfil que produjo el
+        // veredicto: el español desde la Fase 3.2, el de inglés en el resto.
+        var weights = result.DetectedLanguage == TextLanguage.Spanish ? _spanishWeights : _weights;
+        var ranges = result.DetectedLanguage == TextLanguage.Spanish ? _spanishRanges : _ranges;
+        var diagnostics = result.Signals.Select(s => Diagnose(s, weights, ranges)).ToList();
 
         var actions = diagnostics
             .Where(d => d.HasData && d.Status == SignalStatus.AboveHumanRange)
@@ -81,21 +102,21 @@ public sealed class DetectionExplainer : IDetectionExplainer
     }
 
     /// <summary>
-    /// Avisos de fiabilidad por idioma, basados en la medición de la Fase 3
-    /// (docs/SPANISH.md): en español el problema medido no son los falsos positivos,
-    /// sino la ceguera — los dos modelos ONNX son de inglés y puntúan ~0 tanto el
-    /// texto humano como el de IA en español, así que un veredicto «humano» en
-    /// español no distingue nada hoy.
+    /// Avisos de fiabilidad por idioma. Desde la Fase 3.2 el español tiene su propio
+    /// perfil calibrado (docs/SPANISH.md): el aviso ya no es «no es fiable», sino el
+    /// nivel real alcanzado — accuracy agrupada 0,91 en su corpus, frente a 0,97 en
+    /// inglés, con la IA de un número reducido de generadores.
     /// </summary>
     private static IReadOnlyList<string> BuildWarnings(TextLanguage language) => language switch
     {
         TextLanguage.Spanish =>
         [
-            "Texto en español: la calibración del ensemble es de inglés (HC3) y los dos modelos "
-            + "ONNX también. Medido en la Fase 3 (docs/SPANISH.md): en español ambos modelos "
-            + "puntúan ≈0 tanto para texto humano como para texto de IA, así que el detector "
-            + "apenas detecta IA en español y un veredicto «humano» aquí NO es fiable. Las "
-            + "señales estadísticas sí miden, pero su peso calibrado no basta para compensarlo.",
+            "Texto en español: se aplicó el perfil calibrado en español (Fase 3.2, "
+            + "docs/SPANISH.md), con accuracy agrupada de 0,91 en su corpus de calibración "
+            + "frente a 0,97 del inglés. Los modelos ONNX son de inglés y en este perfil "
+            + "pesan ≈0: la decisión recae sobre todo en burstiness y las demás señales "
+            + "estadísticas. El corpus de IA procede de pocos generadores, así que trata "
+            + "el resultado con más cautela que uno en inglés.",
         ],
         TextLanguage.Unknown =>
         [
@@ -105,11 +126,12 @@ public sealed class DetectionExplainer : IDetectionExplainer
         _ => [],
     };
 
-    private SignalDiagnostic Diagnose(SignalScore signal)
+    private static SignalDiagnostic Diagnose(
+        SignalScore signal, EnsembleWeightsData weights, IReadOnlyDictionary<string, HumanRange> ranges)
     {
-        var hasCoefficient = _weights.Weights.TryGetValue(signal.Name, out var coefficient);
+        var hasCoefficient = weights.Weights.TryGetValue(signal.Name, out var coefficient);
         double? contribution = hasCoefficient ? coefficient * signal.NormalizedScore : null;
-        var hasRange = _ranges.TryGetValue(signal.Name, out var range);
+        var hasRange = ranges.TryGetValue(signal.Name, out var range);
 
         if (!signal.HasData)
         {
@@ -136,9 +158,8 @@ public sealed class DetectionExplainer : IDetectionExplainer
             hasCoefficient ? coefficient : null, contribution, range, status, recommendation);
     }
 
-    private static IReadOnlyDictionary<string, HumanRange> LoadRanges()
+    private static IReadOnlyDictionary<string, HumanRange> LoadRanges(string resourceName)
     {
-        const string resourceName = "IAdetector.Infrastructure.Ensemble.HumanReferenceRanges.json";
         using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Recurso embebido no encontrado: {resourceName}");
         var file = JsonSerializer.Deserialize(stream, IAdetectorJsonContext.Default.HumanReferenceRangesFile)

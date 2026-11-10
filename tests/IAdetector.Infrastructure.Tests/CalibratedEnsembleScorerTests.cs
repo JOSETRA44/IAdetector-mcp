@@ -174,3 +174,42 @@ public class CalibratedEnsembleScorerTests
 
     private static double Sigmoid(double z) => 1.0 / (1.0 + Math.Exp(-z));
 }
+
+public class CalibratedEnsembleScorerLanguageRoutingTests
+{
+    private const string SpanishText =
+        "El zorro marrón salta sobre el perro mientras el granjero observa el campo, y la "
+        + "gente del pueblo comenta que es una escena de lo más curiosa para un día de mercado.";
+
+    private const string EnglishText =
+        "The quick brown fox jumps over the lazy dog while the farmer watches the field, "
+        + "and the people of the village say that it is a curious scene for a market day.";
+
+    private static readonly EnsembleWeightsData EnglishWeights = new(
+        Intercept: -20.0, Weights: new Dictionary<string, double> { ["burstiness"] = 0.0 });
+
+    private static readonly EnsembleWeightsData SpanishWeights = new(
+        Intercept: 20.0, Weights: new Dictionary<string, double> { ["burstiness"] = 0.0 });
+
+    [Fact]
+    public void Combine_SpanishSample_UsesSpanishProfile()
+    {
+        var sut = new CalibratedEnsembleScorer(EnglishWeights, SpanishWeights);
+        var scores = new[] { new SignalScore("burstiness", 0.5, 0.5, 1.0, "") };
+
+        var result = sut.Combine(TextSample.Create(SpanishText), scores);
+
+        Assert.True(result.AiProbability > 0.99);
+    }
+
+    [Fact]
+    public void Combine_EnglishSample_UsesEnglishProfile()
+    {
+        var sut = new CalibratedEnsembleScorer(EnglishWeights, SpanishWeights);
+        var scores = new[] { new SignalScore("burstiness", 0.5, 0.5, 1.0, "") };
+
+        var result = sut.Combine(TextSample.Create(EnglishText), scores);
+
+        Assert.True(result.AiProbability < 0.01);
+    }
+}

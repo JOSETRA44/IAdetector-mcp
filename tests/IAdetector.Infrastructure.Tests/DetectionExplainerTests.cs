@@ -76,7 +76,7 @@ public class DetectionExplainerTests
     }
 
     [Fact]
-    public void Explain_SpanishResult_WarnsThatHumanVerdictIsUnreliable()
+    public void Explain_SpanishResult_NotesSpanishProfileAndItsLevel()
     {
         var result = new DetectionResult(
             Verdict.LikelyHuman, 0.1, 0.8,
@@ -86,7 +86,7 @@ public class DetectionExplainerTests
         var explanation = Explainer().Explain(result);
 
         Assert.Equal(TextLanguage.Spanish, explanation.Language);
-        Assert.Contains(explanation.Warnings, w => w.Contains("NO es fiable"));
+        Assert.Contains(explanation.Warnings, w => w.Contains("perfil calibrado en español"));
     }
 
     [Fact]
