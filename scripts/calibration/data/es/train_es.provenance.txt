@@ -1,0 +1,20 @@
+Corpus de calibración en español (Fase 3.2) — train_es_part{1,2,3}.jsonl
+========================================================================
+Grupos (question = tema) mezclados con semilla 42 y partidos en 3 para una
+extracción reanudable; features_train.csv es la unión con question_id
+renumerado de forma única (371 grupos, 568 filas).
+
+Humanos (336):
+- 244 muestras de la Wikipedia en español, última revisión de cada artículo
+  de 2021 o anterior (texto humano previo a la era de los LLM): 123 temas × 2
+  muestras de 200-300 palabras (source: wikipedia_es_rev<=2021).
+- 92 muestras de dominio público (Project Gutenberg): Don Quijote #2000 (45),
+  La Regenta #17073 (35), Lazarillo de Tormes #320 (12), en subgrupos por obra.
+
+IA (232):
+- Generados por Gemini (Antigravity CLI) el 2026-11-09/10: 131 textos sobre
+  los temas de la lista A y 101 sobre la lista B (temas enciclopédicos +
+  temas de ensayo), 200-280 palabras, prosa expositiva típica de LLM.
+- Limitación declarada: UN solo generador en el entrenamiento. La
+  generalización a otros generadores se midió aparte con el corpus held-out
+  de la Fase 3 (IA de Muse Spark): ver docs/SPANISH.md.

@@ -9,6 +9,14 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **Perfil calibrado en español** (Fase 3.2, ver `docs/SPANISH.md`):
+  `EnsembleWeightsEs.json`, calibrado sobre un corpus propio de 568 textos
+  (371 temas; humanos de Wikipedia ≤2021 y dominio público, IA de un LLM) con
+  GroupKFold por tema: accuracy 0,9067, AUROC 0,9582. El scorer enruta por
+  idioma detectado y el explicador usa los coeficientes y rangos humanos del
+  perfil activo (`HumanReferenceRangesEs.json`). En el held-out de la Fase 3
+  (IA de otro generador), la detección en español pasa de 0/18 a 12/18 con
+  1/21 falsos positivos. La huella de versión de la caché cubre ambos perfiles.
 - **Detección de idioma y aviso de fiabilidad en español** (Fase 3, ver
   `docs/SPANISH.md`): `DetectionResult` lleva `detectedLanguage` (detector por
   palabras funcionales, ES/EN/Unknown) y `explain_detection` incluye `language` y

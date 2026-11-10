@@ -1,0 +1,32 @@
+{
+  "intercept": -6.347866398551076,
+  "weights": {
+    "burstiness": 8.01242509829964,
+    "type-token-ratio": -0.0028881155824937114,
+    "lexical-entropy": -0.0028881155824937114,
+    "compression-ratio": 1.2445110269439978,
+    "ngram-repetition": -0.8960590959056233,
+    "onnx-classifier": -0.0035344385681545165,
+    "perplexity": -0.032560502820692894
+  },
+  "trainedOn": {
+    "samples": 568,
+    "cvAccuracy": 0.9066901408450704,
+    "trainAccuracy": 0.9084507042253521
+  },
+  "evaluation": {
+    "method": "GroupKFold(5) por pregunta, predicciones fuera de fold",
+    "groupedByQuestion": {
+      "accuracy": 0.9066901408450704,
+      "brier": 0.08211483323507184,
+      "ece": 0.09637723047682749,
+      "auroc": 0.9582050492610837
+    },
+    "byRows": {
+      "accuracy": 0.9049295774647887,
+      "brier": 0.08220616056088022,
+      "ece": 0.09237453462862165,
+      "auroc": 0.9579997947454844
+    }
+  }
+}

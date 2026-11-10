@@ -74,9 +74,53 @@ intercept y los pesos para español.
 - Corpus, `features_before.csv` y script de evaluación commiteados: la línea base
   contra la que se medirá cualquier calibración en español.
 
-## La decisión que queda (Fase 3.2)
+## Fase 3.2: perfil calibrado en español (hecho)
 
-Calibrar un **perfil en español** (`EnsembleWeights.es.json` + enrutado por idioma en
+Se construyó el corpus propio (procedencia completa en
+`scripts/calibration/data/es/train_es.provenance.txt`): **568 textos de 200–300
+palabras en 371 grupos-tema** — 336 humanos (244 de la Wikipedia en español en
+revisiones ≤2021, previos a la era LLM, y 92 de literatura de dominio público) y
+232 de IA generados por un LLM (Gemini vía Antigravity). Ajuste con el mismo
+procedimiento de la Fase 1.2 (GroupKFold por tema):
+
+| Métrica (agrupada) | Español (3.2) | Inglés (1.2, referencia) |
+|---|---|---|
+| Accuracy | **0,9067** | 0,9697 |
+| Brier | 0,0821 | 0,0257 |
+| ECE | 0,0964 | 0,0220 |
+| AUROC | 0,9582 | 0,9924 |
+
+Qué aprendió el ajuste (coeficientes ES frente a EN): burstiness domina (8,01);
+onnx-classifier (−0,004) y perplexity (−0,033) quedan en ≈0 — el propio ajuste
+confirma que los modelos ingleses no aportan nada en español —; TTR y entropía no
+midieron ninguna muestra (sus mínimos son 400 palabras y el corpus es de 200–300),
+así que el perfil decide con burstiness, n-gramas, compresión y lo poco que haya.
+
+**Verificación fuera del corpus** (el corpus held-out de la Fase 3, que no se usó
+para entrenar y cuya IA es de *otro* generador, Muse Spark):
+
+| Held-out Fase 3 | Antes (perfil EN) | Después (perfil ES) |
+|---|---|---|
+| Falsos positivos (humanos clásicos) | 0/21 | 1/21 |
+| IA detectada | **0/18** | **12/18 (67 %)** |
+| Prob. IA media (IA) | 0,012 | 0,599 |
+
+La transferencia entre generadores es parcial (67 % frente al ~91 % dentro del
+corpus): el perfil es útil, no definitivo. Cableado: `CalibratedEnsembleScorer`
+enruta por `LanguageDetector` al perfil `EnsembleWeightsEs.json`; el explicador usa
+los coeficientes y rangos del perfil activo (rangos ES en
+`HumanReferenceRangesEs.json`); la huella de la caché cubre ambos perfiles. El
+aviso en español de `explain_detection` ahora declara el nivel alcanzado (0,91) y
+sus cautelas en vez de «no fiable».
+
+**Deuda conocida**: (1) entrenar con más generadores de IA (la mayor mejora
+esperable); (2) corpus de 400+ palabras para que TTR/entropía puedan calibrarse
+en español; (3) evaluar un clasificador multilingüe como señal, ahora ya con
+corpus contra el que medirlo.
+
+## La decisión que quedó (resuelta en la 3.2)
+
+Calibrar un **perfil en español** (`EnsembleWeightsEs.json` + enrutado por idioma en
 el scorer) exige antes un corpus en español a escala y de registro moderno:
 
 - Humanos modernos: textos con fecha previa a la era LLM (p. ej., Wikipedia en
