@@ -52,6 +52,11 @@ internal static class DescribeCommand
             SupportsAll: false,
             Network: true,
             ["iadetector models download --model roberta-openai-detector -f json"]),
+        ["models verify"] = new(
+            ["model", "file", "state", "sha256"],
+            SupportsAll: false,
+            Network: false,
+            ["iadetector models verify -f json"]),
         ["cache"] = new(
             ["path", "entries", "stale_entries", "size_bytes"],
             SupportsAll: false,

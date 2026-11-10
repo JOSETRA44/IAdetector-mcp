@@ -18,10 +18,17 @@ public sealed class DistilGpt2PerplexityAnalyzer(IModelCache cache) : ISignalAna
 {
     public string Name => "perplexity";
 
-    // n_ctx=1024 en config.json, pero limitamos a 256 tokens: suficiente para una estimación de
-    // perplexity representativa (Fast-DetectGPT/Binoculars también operan sobre ventanas acotadas)
-    // sin pagar el costo de una matriz de logits [1, 1024, 50257] completa por cada detección.
+    // n_ctx=1024 en config.json, pero cada ventana se limita a 256 tokens: suficiente para una
+    // estimación de perplexity representativa (Fast-DetectGPT/Binoculars también operan sobre
+    // ventanas acotadas) sin pagar el costo de una matriz de logits [1, 1024, 50257] completa.
+    // Desde la Fase 4, un texto más largo que la ventana se mide en varias ventanas repartidas
+    // (ver TokenWindows), no solo en la primera.
     private const int MaxTokens = 256;
+
+    // Perplexity usa menos ventanas que el clasificador: cada ventana suya cuesta varias
+    // veces más (barrido del vocabulario completo por posición) y 512 tokens medidos ya
+    // son representativos para esta señal (ver TokenWindows).
+    private const int MaxPerplexityWindows = 2;
     private const int MinWords = 20;
     private const double Weight = 1.0;
 
@@ -62,10 +69,34 @@ public sealed class DistilGpt2PerplexityAnalyzer(IModelCache cache) : ISignalAna
         var model = _loaded.Value;
 
         var allIds = model.Tokenizer.EncodeToIds(text);
-        var ids = allIds.Count > MaxTokens ? allIds.Take(MaxTokens).ToList() : allIds.ToList();
 
-        var inputIds = new DenseTensor<long>(ids.Select(id => (long)id).ToArray(), [1, ids.Count]);
-        var attentionMask = new DenseTensor<long>(Enumerable.Repeat(1L, ids.Count).ToArray(), [1, ids.Count]);
+        // Fase 4: si el texto excede la ventana, la perplexity se agrega (suma de
+        // log-probabilidades ponderada por tokens) sobre ventanas repartidas por todo el
+        // texto, en vez de medir solo las primeras 256 posiciones como hasta ahora.
+        double totalNegLogProb = 0;
+        var totalCount = 0;
+        foreach (var start in TokenWindows.Starts(allIds.Count, MaxTokens, MaxPerplexityWindows))
+        {
+            var length = Math.Min(MaxTokens, allIds.Count - start);
+            var (nll, count) = AccumulateWindow(model, allIds, start, length);
+            totalNegLogProb += nll;
+            totalCount += count;
+        }
+
+        return Math.Exp(totalNegLogProb / totalCount);
+    }
+
+    private static (double NegLogProb, int Count) AccumulateWindow(
+        Gpt2StyleModelLoader.Loaded model, IReadOnlyList<int> allIds, int start, int length)
+    {
+        var ids = new long[length];
+        for (var i = 0; i < length; i++)
+        {
+            ids[i] = allIds[start + i];
+        }
+
+        var inputIds = new DenseTensor<long>(ids, [1, length]);
+        var attentionMask = new DenseTensor<long>(Enumerable.Repeat(1L, length).ToArray(), [1, length]);
 
         var inputs = new List<NamedOnnxValue>
         {
@@ -75,7 +106,7 @@ public sealed class DistilGpt2PerplexityAnalyzer(IModelCache cache) : ISignalAna
 
         if (model.PositionIdsName is { } positionIdsName)
         {
-            var positionIds = new DenseTensor<long>(Enumerable.Range(0, ids.Count).Select(i => (long)i).ToArray(), [1, ids.Count]);
+            var positionIds = new DenseTensor<long>(Enumerable.Range(0, length).Select(i => (long)i).ToArray(), [1, length]);
             inputs.Add(NamedOnnxValue.CreateFromTensor(positionIdsName, positionIds));
         }
 
@@ -96,14 +127,16 @@ public sealed class DistilGpt2PerplexityAnalyzer(IModelCache cache) : ISignalAna
         // cada llamada) hacía esto ~30-60x más lento de lo necesario.
         var span = ((DenseTensor<float>)logitsTensor).Buffer.Span;
 
-        double totalNegLogProb = 0;
+        double negLogProb = 0;
         var count = 0;
 
         // Perplexity estándar: para cada posición, cross-entropy entre la distribución predicha
         // (softmax de los logits) y el token real siguiente. Un solo forward pass (teacher forcing).
-        for (var pos = 0; pos < ids.Count - 1; pos++)
+        // La suma exponencial va en float (MathF): es la mitad de ancha que el double anterior
+        // y la precisión sobra para un log-sum-exp que luego se promedia entre cientos de tokens.
+        for (var pos = 0; pos < length - 1; pos++)
         {
-            var targetId = ids[pos + 1];
+            var targetId = (int)ids[pos + 1];
             var row = span.Slice(pos * vocabSize, vocabSize);
 
             var maxLogit = float.NegativeInfinity;
@@ -118,17 +151,17 @@ public sealed class DistilGpt2PerplexityAnalyzer(IModelCache cache) : ISignalAna
             double sumExp = 0;
             for (var v = 0; v < vocabSize; v++)
             {
-                sumExp += Math.Exp(row[v] - maxLogit);
+                sumExp += MathF.Exp(row[v] - maxLogit);
             }
 
             var logSumExp = Math.Log(sumExp) + maxLogit;
             var logProbTarget = row[targetId] - logSumExp;
 
-            totalNegLogProb += -logProbTarget;
+            negLogProb += -logProbTarget;
             count++;
         }
 
-        return Math.Exp(totalNegLogProb / count);
+        return (negLogProb, count);
     }
 
     public void Dispose()

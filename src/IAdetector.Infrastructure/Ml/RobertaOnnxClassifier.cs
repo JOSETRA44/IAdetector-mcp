@@ -34,10 +34,34 @@ public sealed class RobertaOnnxClassifier(IModelCache cache) : IOnnxClassifier, 
         var model = _loaded.Value;
 
         var contentIds = model.Tokenizer.EncodeToIds(text);
-        var truncated = contentIds.Count > MaxContentTokens ? contentIds.Take(MaxContentTokens) : contentIds;
 
-        var ids = new List<long> { BosTokenId };
-        ids.AddRange(truncated.Select(id => (long)id));
+        // Fase 4: si el texto no cabe en la ventana del modelo, se promedia la probabilidad
+        // sobre ventanas repartidas por todo el texto en vez de clasificar solo el principio.
+        var starts = TokenWindows.Starts(contentIds.Count, MaxContentTokens);
+        if (starts.Count == 1)
+        {
+            return ClassifyWindow(model, contentIds, 0);
+        }
+
+        double sum = 0;
+        foreach (var start in starts)
+        {
+            sum += ClassifyWindow(model, contentIds, start);
+        }
+
+        return (float)(sum / starts.Count);
+    }
+
+    private static float ClassifyWindow(Gpt2StyleModelLoader.Loaded model, IReadOnlyList<int> contentIds, int start)
+    {
+        var length = Math.Min(MaxContentTokens, contentIds.Count - start);
+
+        var ids = new List<long>(length + 2) { BosTokenId };
+        for (var i = 0; i < length; i++)
+        {
+            ids.Add(contentIds[start + i]);
+        }
+
         ids.Add(EosTokenId);
 
         var inputIds = new DenseTensor<long>(ids.ToArray(), [1, ids.Count]);

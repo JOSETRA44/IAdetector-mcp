@@ -13,7 +13,62 @@ internal static class ModelsCommand
         {
             CreateList(cache),
             CreateDownload(cache, downloader),
+            CreateVerify(cache),
         };
+    }
+
+    private static Command CreateVerify(IModelCache cache)
+    {
+        var modelOption = new Option<string?>("--model")
+        {
+            Description = "Id del modelo a verificar (por defecto, todos los del catálogo).",
+        };
+
+        var command = new Command("verify", "Verifica la integridad (SHA-256) de los modelos descargados contra el catálogo.")
+        {
+            modelOption,
+        };
+
+        command.WithGlobals();
+
+        command.SetAction((parseResult, cancellationToken) =>
+            Guard.RunAsync(parseResult, "models verify", async context =>
+        {
+            var only = parseResult.GetValue(modelOption);
+            var renderer = new Renderer(context);
+            var allIntact = true;
+
+            var entries = only is null
+                ? ModelCatalog.Entries.Values
+                : [ModelCatalog.Get(only)];
+
+            foreach (var entry in entries)
+            {
+                var report = await ModelIntegrity
+                    .VerifyAsync(entry.ModelId, cache.GetPath(entry.ModelId), cancellationToken)
+                    .ConfigureAwait(false);
+
+                foreach (var file in report.Files)
+                {
+                    allIntact &= file.State == ModelFileState.Ok;
+                    renderer.Add(new Row()
+                        .Add("model", entry.ModelId)
+                        .Add("file", file.FileName)
+                        .Add("state", file.State switch
+                        {
+                            ModelFileState.Ok => "ok",
+                            ModelFileState.Missing => "missing",
+                            _ => "corrupt",
+                        })
+                        .Add("sha256", file.ActualSha256));
+                }
+            }
+
+            renderer.Finish(new EnvelopeInfo("models verify"));
+            return allIntact ? ExitCodes.Ok : ExitCodes.Failure;
+        }));
+
+        return command;
     }
 
     private static Command CreateList(IModelCache cache)

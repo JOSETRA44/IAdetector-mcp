@@ -83,15 +83,28 @@ public sealed class DetectTextUseCase(
         var sampled = allChunks.Count > MaxChunks;
         var chunksToAnalyze = sampled ? SampleEvenly(allChunks, MaxChunks) : allChunks;
 
-        var perChunkScores = new List<(int WordCount, IReadOnlyList<SignalScore> Scores)>(chunksToAnalyze.Count);
-
-        foreach (var chunkText in chunksToAnalyze)
+        // Fase 4: los fragmentos se analizan en paralelo con concurrencia acotada — son
+        // independientes y el análisis secuencial hacía que un documento largo costara la
+        // suma de todos sus fragmentos en serie. Los resultados se guardan por índice y se
+        // agregan en el orden original: el resultado es el mismo que en secuencial.
+        var perChunk = new (int WordCount, IReadOnlyList<SignalScore> Scores)[chunksToAnalyze.Count];
+        var options = new ParallelOptions
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var chunkSample = TextSample.Create(chunkText);
-            var scores = await RunAnalyzersAsync(chunkSample, cancellationToken).ConfigureAwait(false);
-            perChunkScores.Add((chunkSample.WordCount, scores));
-        }
+            MaxDegreeOfParallelism = Math.Min(4, Environment.ProcessorCount),
+            CancellationToken = cancellationToken,
+        };
+
+        await Parallel.ForEachAsync(
+            Enumerable.Range(0, chunksToAnalyze.Count),
+            options,
+            async (index, ct) =>
+            {
+                var chunkSample = TextSample.Create(chunksToAnalyze[index]);
+                var scores = await RunAnalyzersAsync(chunkSample, ct).ConfigureAwait(false);
+                perChunk[index] = (chunkSample.WordCount, scores);
+            }).ConfigureAwait(false);
+
+        var perChunkScores = perChunk.ToList();
 
         var aggregated = AggregateSignals(perChunkScores);
         var chunkInfo = new ChunkInfo(chunksToAnalyze.Count, fullSample.WordCount, sampled);

@@ -29,6 +29,7 @@ public sealed class ManifestTests
         {
             new Command("list", "Lista modelos.").WithGlobals(),
             new Command("download", "Descarga un modelo.").WithGlobals(),
+            new Command("verify", "Verifica modelos.").WithGlobals(),
         };
 
         var cache = new Command("cache", "Caché de resultados.")
@@ -90,7 +91,7 @@ public sealed class ManifestTests
 
         var expected = new HashSet<string>(StringComparer.Ordinal)
         {
-            "detect", "batch", "models list", "models download",
+            "detect", "batch", "models list", "models download", "models verify",
             "cache stats", "cache clear", "cache path", "describe",
         };
 
