@@ -23,6 +23,9 @@
     <PackageId>IAdetector.Mcp</PackageId>
     <PackageVersion>1.0.0</PackageVersion>
     <PackageTags>AI; MCP; server; stdio; ai-detection</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/JOSETRA44/IAdetector-mcp</PackageProjectUrl>
+    <Authors>JOSETRA44</Authors>
     <Description>MCP server local (sin APIs externas) para detectar texto generado por IA.</Description>
   </PropertyGroup>
 
