@@ -34,9 +34,10 @@ mide, explica y compara; reescribir es trabajo del agente que consume las tools.
 - El «0 %» significa 0 % **en este detector**. Otros detectores miden otras cosas;
   ninguna herramienta puede prometer invisibilidad universal, y este documento no lo hace.
 - La calibración y los rangos humanos vienen de HC3 (respuestas de ChatGPT de 2023
-  frente a texto humano en inglés, sobre todo de Wikipedia). En español o en otros
-  dominios las cifras son menos fiables — el falso positivo en español está documentado
-  y el soporte de español es trabajo futuro (ver `docs/CALIBRATION.md`).
+  frente a texto humano en inglés, sobre todo de Wikipedia). El español tiene su
+  propio perfil calibrado desde la Fase 3.2 (accuracy agrupada 0,9067 frente a
+  0,9697 en inglés; ver `docs/SPANISH.md`): fiable, pero menos, y `explain_detection`
+  lo avisa en sus `warnings`. En otros idiomas no hay validación.
 - La similitud de `compare_versions` es Jaccard sobre palabras de contenido (≥4 letras):
   una heurística léxica para frenar reescrituras que vacían el texto, no una prueba de
   que el significado se conserva. La revisión final del significado es del agente y,

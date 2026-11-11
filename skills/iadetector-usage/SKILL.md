@@ -1,6 +1,6 @@
 ---
 name: iadetector-usage
-description: Explica cómo interpretar y comunicar los resultados del servidor MCP IAdetector (detect_text, detect_file, batch_detect_directory, explain_detection) — qué significan el veredicto, la probabilidad de IA y la confianza, cuándo cada tool es la indicada, y cómo transmitir el resultado sin sobre-afirmar certeza. Usa esta skill SIEMPRE que llames a cualquier tool de IAdetector, o cuando el usuario pregunte si un texto/archivo/documento fue escrito por IA, "suena a ChatGPT", pida un chequeo de plagio/contenido generado, o quiera saber si algo es "auténtico"/humano — aunque no mencione IAdetector por nombre.
+description: Explica cómo interpretar y comunicar los resultados del servidor MCP IAdetector (detect_text, detect_file, batch_detect_directory, explain_detection, compare_versions) — qué significan el veredicto, la probabilidad de IA y la confianza, cuándo cada tool es la indicada, cómo iterar reescribiendo con explain_detection + compare_versions, y cómo transmitir el resultado sin sobre-afirmar certeza. Usa esta skill SIEMPRE que llames a cualquier tool de IAdetector, o cuando el usuario pregunte si un texto/archivo/documento fue escrito por IA, "suena a ChatGPT", pida un chequeo de plagio/contenido generado, o quiera saber si algo es "auténtico"/humano — aunque no mencione IAdetector por nombre. El contrato completo está en docs/AGENT_GUIDE.md del repositorio.
 ---
 
 # Interpretar resultados de IAdetector
@@ -15,6 +15,7 @@ IAdetector estima la probabilidad de que un texto haya sido generado por IA comb
 | Un archivo local específico | `detect_file` |
 | Varios archivos de un directorio | `batch_detect_directory` |
 | El usuario quiere saber *por qué* (desglose señal por señal) | `explain_detection`, o `detect_text`/`detect_file` con `verbose: true` |
+| Iterar reescribiendo para bajar la probabilidad de IA | `explain_detection` (diagnóstico) → reescribes tú → `compare_versions` (validas) — ver `docs/AGENT_LOOP.md` |
 
 Si el texto/archivo excede el límite, la tool lo dice explícitamente en el error — no lo trunques tú mismo primero, deja que la tool decida (fragmenta automáticamente textos largos, muestreando si son muy grandes).
 
@@ -42,7 +43,7 @@ Si el texto/archivo excede el límite, la tool lo dice explícitamente en el err
 
 **`confidence`** no es "qué tan seguro estoy de que es IA" — es **qué tan de acuerdo están las señales entre sí**. Un veredicto extremo (AI o Human) con confianza BAJA significa que las señales se contradicen (ej. el clasificador ONNX dice 100% IA pero las señales estadísticas no ven nada raro) — trata ese caso como más incierto de lo que el veredicto solo sugiere, y dilo explícitamente si el usuario está tomando una decisión importante con el resultado.
 
-**`signals`** (solo si pediste `verbose`) — cada señal trae `normalizedScore` (0–1, su propia opinión sobre si es IA), `weight` (cuánto pesó en el resultado final) y `explanation` en texto. Si una señal dice "no descargado" o "muy pocas palabras/insuficiente", significa que esa señal no contribuyó de forma confiable — es normal y el resto del ensemble sigue funcionando, pero vale la pena mencionarlo si el usuario pregunta por qué la confianza es baja.
+**`signals`** (solo si pediste `verbose`) — cada señal trae `normalizedScore` (0–1, su propia opinión sobre si es IA), `weight` (cuánto pesó en el resultado final), `explanation` en texto y **`hasData`**: si es `false`, esa señal no midió (texto corto o modelo no descargado) y su 0,5 es una convención, no una medición. Si *ninguna* señal tiene datos, el resultado es `Mixed / 0,5 / confianza 0` — el detector diciendo "no lo sé". Con `explain_detection` cada señal trae además `logitContribution` (β × puntuación: cuánto empuja el veredicto), el rango humano de referencia y `prioritizedActions` con lo que más conviene atacar primero; el resultado incluye `detectedLanguage` y `warnings` de fiabilidad que debes respetar (en especial en español).
 
 **`chunkInfo`** — presente solo si el texto era largo y se fragmentó. Si `sampled: true`, el documento era tan grande que se analizó una muestra representativa, no el texto completo; menciónalo si es relevante (ej. un análisis muy rápido sobre un archivo enorme).
 
@@ -53,7 +54,7 @@ Dos de las siete señales (`onnx-classifier`, `perplexity`) requieren modelos ON
 ## Limitaciones a comunicar honestamente
 
 - El clasificador ONNX (RoBERTa) fue entrenado para detectar salidas de **GPT-2** (2019); generaliza de forma imperfecta a estilos de LLMs más recientes. Un texto de un modelo moderno puede pasar desapercibido para esa señal específica — por eso el ensemble combina varias señales, no confía en una sola.
-- Calibrado sobre datos en inglés (dataset HC3); no está validado específicamente en español u otros idiomas — trata resultados en otros idiomas con más cautela.
+- La calibración principal es de inglés (HC3): accuracy 0,97. El español tiene perfil propio calibrado (Fase 3.2, accuracy agrupada 0,91): funciona, pero con más cautela — la propia tool lo avisa en `warnings`. Otros idiomas no están validados. El "0%" de un bucle de reescritura es 0% frente a *este* detector, nunca indetectabilidad universal.
 - Es una estimación probabilística de un sistema heurístico, no una prueba forense. Nunca lo presentes como un hecho definitivo ("esto ES IA"); preséntalo como lo que es ("el detector estima 66% de probabilidad de IA, veredicto LikelyAI, confianza 28%").
 
 ## Cómo responder al usuario

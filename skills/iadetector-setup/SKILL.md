@@ -67,7 +67,10 @@ Dos de las siete señales de detección (`onnx-classifier`, `perplexity`) requie
 iadetector models download --model roberta-openai-detector
 iadetector models download --model distilgpt2-perplexity
 iadetector models list   # confirma que ambos quedaron "descargado"
+iadetector models verify # audita los SHA-256 contra el catálogo (útil si algo huele a corrupto)
 ```
+
+`models download` verifica el hash de lo que baja **y de lo que ya existía**: un archivo corrupto se vuelve a descargar solo. Si `models verify` reporta `corrupt` y no hay red para repararlo, las señales de ese modelo cargarán mal o quedarán fuera — reintenta la descarga.
 
 Se cachean en `%LOCALAPPDATA%\IAdetector\models` (Windows) o el equivalente XDG en Linux, con verificación SHA-256. Sin ellos, esas dos señales quedan neutrales con peso reducido — el resto del ensemble (5 señales estadísticas) sigue funcionando, solo que con menos precisión.
 

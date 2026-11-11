@@ -3,7 +3,7 @@
   "name": "io.github.JOSETRA44/iadetector-mcp",
   "title": "IAdetector",
   "description": "Detecta texto generado por IA de forma 100% local: siete señales estadísticas y dos modelos ONNX. El texto analizado nunca sale de la máquina.",
-  "version": "0.1.0-beta",
+  "version": "1.0.0",
   "websiteUrl": "https://github.com/JOSETRA44/iadetector-mcp#readme",
   "repository": {
     "url": "https://github.com/JOSETRA44/iadetector-mcp",
@@ -14,7 +14,7 @@
       "registryType": "nuget",
       "registryBaseUrl": "https://api.nuget.org/v3/index.json",
       "identifier": "IAdetector.Cli",
-      "version": "0.1.0-beta",
+      "version": "1.0.0",
       "runtimeHint": "dnx",
       "transport": {
         "type": "stdio"
