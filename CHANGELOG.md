@@ -7,8 +7,19 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-10
+
+Primera release completa: el detector queda con calibración verificada en inglés y
+español, bucle prescriptivo para agentes, cobertura completa de los modelos ONNX e
+integridad verificable de los modelos descargados.
+
 ### Added
 
+- **Contrato para agentes** (Fase 5): `docs/AGENT_GUIDE.md` consolida el contrato
+  completo de las tools MCP y la CLI (campos y su semántica, protocolo del bucle,
+  fiabilidad por idioma, límites duros y límites honestos de comunicación). Skills
+  del repositorio actualizadas (`compare_versions`, perfil en español, `models
+  verify`) y workflow de CI (compilación + pruebas en cada push).
 - **Rendimiento e integridad** (Fase 4, ver `docs/PERFORMANCE.md`):
   - Las señales ONNX ya no truncan en silencio: si el texto excede la ventana del
     modelo, se evalúan ventanas repartidas por todo el texto (RoBERTa hasta 4,

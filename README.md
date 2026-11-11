@@ -153,6 +153,8 @@ iadetector models verify [--model <id>]
 - `explain_detection(text)` — explicación prescriptiva: por señal, si midió, cuánto empuja el resultado (contribución al logit), su rango típico en texto humano de referencia y qué cambiar si está fuera de rango, con acciones priorizadas.
 - `compare_versions(originalText, rewrittenText)` — compara una reescritura con su original (sin estado): cambio de probabilidad y por señal, con salvaguarda de significado (si la reescritura pierde el vocabulario de contenido del original, el resultado es `no_concluyente` aunque la probabilidad baje). Ver `docs/AGENT_LOOP.md`.
 
+**Para agentes que consumen estas tools**: el contrato completo (campos, semántica, protocolo del bucle, fiabilidad por idioma y límites) está en [`docs/AGENT_GUIDE.md`](docs/AGENT_GUIDE.md).
+
 ## Skills para agentes (Claude Code)
 
 `skills/` (layout plano estándar `skills/<nombre>/SKILL.md`, el mismo que usan proyectos como Vercel o Supabase para distribuir sus propias skills) incluye dos skills instalables con [`npx skills`](https://github.com/vercel-labs/skills):
