@@ -19,7 +19,8 @@ integridad verificable de los modelos descargados.
   completo de las tools MCP y la CLI (campos y su semántica, protocolo del bucle,
   fiabilidad por idioma, límites duros y límites honestos de comunicación). Skills
   del repositorio actualizadas (`compare_versions`, perfil en español, `models
-  verify`) y workflow de CI (compilación + pruebas en cada push).
+  verify`). (El workflow de CI está preparado pero pendiente de subir: requiere el
+  alcance `workflow` en el token de GitHub.)
 - **Rendimiento e integridad** (Fase 4, ver `docs/PERFORMANCE.md`):
   - Las señales ONNX ya no truncan en silencio: si el texto excede la ventana del
     modelo, se evalúan ventanas repartidas por todo el texto (RoBERTa hasta 4,
