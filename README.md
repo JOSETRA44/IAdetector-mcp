@@ -65,13 +65,14 @@ Siete señales combinadas en `CalibratedEnsembleScorer`: burstiness, type-token 
 
 ### CLI
 
-**Opción A — `dotnet tool` (requiere el runtime .NET instalado):**
+**Opción A — `dotnet tool` desde NuGet (un solo comando, requiere el runtime .NET):**
 
 ```bash
-dotnet pack src/IAdetector.Cli -c Release -o ./nupkg
-dotnet tool install --global --add-source ./nupkg IAdetector.Cli
+dotnet tool install --global IAdetector.Cli
 iadetector detect ejemplo.txt
 ```
+
+(Para instalar desde el código fuente en vez de NuGet: `dotnet pack src/IAdetector.Cli -c Release -o ./nupkg` y luego `dotnet tool install --global --add-source ./nupkg IAdetector.Cli`.)
 
 **Opción B — binario nativo standalone (sin necesidad de instalar .NET):**
 
@@ -84,13 +85,9 @@ Cambiar `win-x64` por `linux-x64` según la plataforma.
 
 ### Servidor MCP
 
-**Opción A — publicar como paquete NuGet (`dnx`, sin clonar el repo):**
+**Opción A — paquete NuGet con `dnx` (sin clonar el repo ni instalar nada antes):**
 
-```bash
-dotnet pack src/IAdetector.Mcp -c Release -o ./nupkg
-```
-
-Configurar el host MCP (ej. `.vscode/mcp.json`):
+Configurar el host MCP (ej. `.vscode/mcp.json`) y `dnx` descarga y ejecuta el servidor desde NuGet:
 
 ```json
 {
@@ -98,7 +95,7 @@ Configurar el host MCP (ej. `.vscode/mcp.json`):
     "IAdetector": {
       "type": "stdio",
       "command": "dnx",
-      "args": ["IAdetector.Mcp", "--version", "0.1.0-beta", "--yes"]
+      "args": ["IAdetector.Mcp", "--version", "1.0.0", "--yes"]
     }
   }
 }
