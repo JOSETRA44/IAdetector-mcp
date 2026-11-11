@@ -13,7 +13,7 @@
     {
       "registryType": "nuget",
       "registryBaseUrl": "https://api.nuget.org/v3/index.json",
-      "identifier": "IAdetector.Cli",
+      "identifier": "IAdetector.Mcp",
       "version": "1.0.0",
       "runtimeHint": "dnx",
       "transport": {

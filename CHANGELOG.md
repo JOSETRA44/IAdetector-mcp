@@ -7,6 +7,15 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- **Publicación en NuGet corregida**: la versión de `IAdetector.Mcp` seguía en
+  `0.1.0-beta` y el `server.json` interno del paquete era aún la plantilla, con
+  marcadores `<your GitHub username here>`; el `server.json` de la raíz apuntaba
+  además al paquete de la CLI en vez de al del servidor. Los tres quedan en 1.0.0
+  y apuntando a `IAdetector.Mcp`, que es el paquete que el registro MCP instala
+  con `dnx`. Instalación en un comando: `dotnet tool install -g IAdetector.Cli`.
+
 ## [1.0.0] - 2026-11-10
 
 Primera release completa: el detector queda con calibración verificada en inglés y
