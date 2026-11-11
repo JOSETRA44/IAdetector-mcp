@@ -1,1 +1,22 @@
-{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json","description":"Detecta si un texto fue generado por IA, 100% local (sin APIs externas): señales estadísticas/estilométricas + clasificador ONNX.","name":"io.github.JOSETRA44/iadetector-mcp","packages":[{"environmentVariables":[],"identifier":"IAdetector.Mcp","packageArguments":[],"registryType":"nuget","transport":{"type":"stdio"},"version":"1.0.0"}],"repository":{"source":"github","url":"https://github.com/JOSETRA44/IAdetector-mcp"},"version":"1.0.0"}
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "description": "Detecta texto generado por IA, 100% local, sin enviar tu texto a ningún servidor.",
+  "name": "io.github.JOSETRA44/iadetector-mcp",
+  "packages": [
+    {
+      "environmentVariables": [],
+      "identifier": "IAdetector.Mcp",
+      "packageArguments": [],
+      "registryType": "nuget",
+      "transport": {
+        "type": "stdio"
+      },
+      "version": "1.0.1"
+    }
+  ],
+  "repository": {
+    "source": "github",
+    "url": "https://github.com/JOSETRA44/IAdetector-mcp"
+  },
+  "version": "1.0.1"
+}
