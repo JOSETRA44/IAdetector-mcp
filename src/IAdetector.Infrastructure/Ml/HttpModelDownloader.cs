@@ -1,12 +1,13 @@
-using System.Security.Cryptography;
 using IAdetector.Core.Abstractions;
 
 namespace IAdetector.Infrastructure.Ml;
 
 /// <summary>
 /// Descarga los archivos de un modelo del <see cref="ModelCatalog"/> a disco, verificando su
-/// SHA-256 tras cada descarga. Idempotente: si un archivo ya existe, no se vuelve a descargar
-/// (permite reintentar tras una descarga parcial sin repetir lo ya obtenido).
+/// SHA-256 tras cada descarga. Idempotente: si un archivo ya existe Y su hash coincide, no se
+/// vuelve a descargar (permite reintentar tras una descarga parcial sin repetir lo ya
+/// obtenido); si existe pero está corrupto, se borra y se descarga de nuevo (Fase 4):
+/// antes, un archivo dañado se daba por bueno para siempre solo por existir.
 /// </summary>
 public sealed class HttpModelDownloader : IModelDownloader, IDisposable
 {
@@ -27,6 +28,12 @@ public sealed class HttpModelDownloader : IModelDownloader, IDisposable
         foreach (var file in entry.Files)
         {
             var destPath = Path.Combine(dir, file.FileName);
+            if (File.Exists(destPath)
+                && !await ModelIntegrity.VerifyFileAsync(destPath, file.Sha256, cancellationToken).ConfigureAwait(false))
+            {
+                File.Delete(destPath);
+            }
+
             if (!File.Exists(destPath))
             {
                 await DownloadOneAsync(file, destPath, progress, totalBytes, bytesDoneBeforeCurrentFile, cancellationToken)
@@ -72,7 +79,7 @@ public sealed class HttpModelDownloader : IModelDownloader, IDisposable
             }
         }
 
-        var actualHash = await ComputeSha256Async(tmpPath, cancellationToken).ConfigureAwait(false);
+        var actualHash = await ModelIntegrity.ComputeSha256Async(tmpPath, cancellationToken).ConfigureAwait(false);
         if (!string.Equals(actualHash, file.Sha256, StringComparison.OrdinalIgnoreCase))
         {
             File.Delete(tmpPath);
@@ -81,13 +88,6 @@ public sealed class HttpModelDownloader : IModelDownloader, IDisposable
         }
 
         File.Move(tmpPath, destPath, overwrite: true);
-    }
-
-    private static async Task<string> ComputeSha256Async(string path, CancellationToken cancellationToken)
-    {
-        await using var stream = File.OpenRead(path);
-        var hash = await SHA256.HashDataAsync(stream, cancellationToken).ConfigureAwait(false);
-        return Convert.ToHexStringLower(hash);
     }
 
     public void Dispose() => _http.Dispose();

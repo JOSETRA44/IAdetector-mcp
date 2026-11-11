@@ -9,6 +9,23 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **Rendimiento e integridad** (Fase 4, ver `docs/PERFORMANCE.md`):
+  - Las señales ONNX ya no truncan en silencio: si el texto excede la ventana del
+    modelo, se evalúan ventanas repartidas por todo el texto (RoBERTa hasta 4,
+    perplexity hasta 2) y se agregan. Verificado en las respuestas más largas de
+    HC3: 0 veredictos cambiados, accuracy idéntica; el corpus ES de la Fase 3
+    produce features byte a byte idénticas (cabe en las ventanas).
+  - Los fragmentos de documentos largos se analizan en paralelo (concurrencia
+    acotada a 4), agregando en el orden original.
+  - `iadetector models verify`: audita los SHA-256 de los modelos descargados
+    contra el catálogo. `models download` ahora verifica también los archivos
+    ya presentes y vuelve a descargar los corruptos.
+  - La huella de la caché de resultados incluye la versión del motor
+    (`engine=4`): un cambio de semántica del análisis invalida las entradas
+    anteriores aunque pesos y modelos no cambien.
+  - Herramienta de benchmark reproducible en `tools/IAdetector.Benchmarks`
+    (texto corto típico del bucle de agentes: ~0,8–1,0 s en caliente en la VM de
+    desarrollo; los textos largos pagan ~2× por la cobertura completa).
 - **Perfil calibrado en español** (Fase 3.2, ver `docs/SPANISH.md`):
   `EnsembleWeightsEs.json`, calibrado sobre un corpus propio de 568 textos
   (371 temas; humanos de Wikipedia ≤2021 y dominio público, IA de un LLM) con

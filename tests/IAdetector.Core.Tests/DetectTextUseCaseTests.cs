@@ -86,3 +86,54 @@ public class DetectTextUseCaseTests
         Assert.Empty(scorer.LastScores!);
     }
 }
+
+public class DetectTextUseCaseParallelismTests
+{
+    private sealed class SlowProbeAnalyzer : IAdetector.Core.Abstractions.ISignalAnalyzer
+    {
+        private int _current;
+        private int _max;
+        public string Name => "slow-probe";
+        public int MaxConcurrent => Volatile.Read(ref _max);
+
+        public async Task<SignalScore> AnalyzeAsync(TextSample sample, CancellationToken cancellationToken = default)
+        {
+            var now = Interlocked.Increment(ref _current);
+            int observed;
+            do
+            {
+                observed = Volatile.Read(ref _max);
+            }
+            while (now > observed && Interlocked.CompareExchange(ref _max, now, observed) != observed);
+
+            try
+            {
+                await Task.Delay(100, cancellationToken);
+                return new SignalScore(Name, 0.5, 0.5, 1.0, "probe");
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _current);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task DetectAsync_LongText_AnalyzesChunksConcurrently()
+    {
+        if (Environment.ProcessorCount < 2)
+        {
+            return; // Sin paralelismo posible en un solo núcleo: nada que afirmar.
+        }
+
+        var analyzer = new SlowProbeAnalyzer();
+        var useCase = new DetectTextUseCase([analyzer], new RecordingScorer());
+        var text = string.Join(' ', Enumerable.Repeat("word", 4000));
+
+        var result = await useCase.DetectAsync(text);
+
+        Assert.Equal(3, result.ChunkInfo!.TotalChunks);
+        Assert.True(analyzer.MaxConcurrent >= 2,
+            $"Se esperaba solape entre fragmentos y el máximo observado fue {analyzer.MaxConcurrent}.");
+    }
+}

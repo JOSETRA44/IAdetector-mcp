@@ -142,6 +142,7 @@ cat archivo.txt | iadetector detect               # también lee de stdin si no 
 iadetector batch <directorio> [--pattern *.txt] [--recursive] [--max-files 1000] [--output resultados.csv]
 iadetector models download --model <id> [--force]
 iadetector models list
+iadetector models verify [--model <id>]
 ```
 
 ## Tools MCP
