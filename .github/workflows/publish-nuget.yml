@@ -1,0 +1,43 @@
+name: Publicar en NuGet
+
+# Publica los paquetes IAdetector.Cli e IAdetector.Mcp en nuget.org.
+# Se dispara al empujar una etiqueta de versión (v1.0.0, v1.1.0, ...) o a mano
+# desde la pestaña Actions. Las versiones publicadas son las de los .csproj
+# (PackageVersion) y server.json: súbelas en el repo antes de etiquetar; las
+# pruebas RegistryMetadataTests fallan si no coinciden.
+# Requiere el secreto NUGET_API_KEY (clave de nuget.org con permiso de push
+# sobre IAdetector.Cli e IAdetector.Mcp) en Settings > Secrets > Actions.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Compilar (Release)
+        run: dotnet build IAdetector.slnx -c Release
+
+      - name: Pruebas
+        run: dotnet test IAdetector.slnx -c Release --no-build
+
+      - name: Empaquetar (Cli + Mcp)
+        run: |
+          dotnet pack src/IAdetector.Cli/IAdetector.Cli.csproj -c Release --no-build -o ./nupkg
+          dotnet pack src/IAdetector.Mcp/IAdetector.Mcp.csproj -c Release --no-build -o ./nupkg
+
+      - name: Publicar en nuget.org
+        run: >
+          dotnet nuget push "./nupkg/*.nupkg"
+          --api-key "${{ secrets.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Compilar (Release)
+        run: dotnet build IAdetector.slnx -c Release
+
+      # Las pruebas rápidas no necesitan los modelos ONNX: las señales sin modelo
+      # ejercitan la ruta «sin datos». La de integración se omite sola, con motivo
+      # explícito, cuando no hay modelos ni corpus en la máquina.
+      - name: Pruebas
+        run: dotnet test IAdetector.slnx -c Release --no-build
