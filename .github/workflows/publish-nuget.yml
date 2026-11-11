@@ -30,10 +30,13 @@ jobs:
       - name: Pruebas
         run: dotnet test IAdetector.slnx -c Release --no-build
 
+      # Sin --no-build: empaquetar reutilizando la compilación previa falla en el
+      # runner (el bundle single-file del RID win-x64 no encuentra su dll en obj/).
+      # Dejar que pack compile garantiza el mismo resultado que en local.
       - name: Empaquetar (Cli + Mcp)
         run: |
-          dotnet pack src/IAdetector.Cli/IAdetector.Cli.csproj -c Release --no-build -o ./nupkg
-          dotnet pack src/IAdetector.Mcp/IAdetector.Mcp.csproj -c Release --no-build -o ./nupkg
+          dotnet pack src/IAdetector.Cli/IAdetector.Cli.csproj -c Release -o ./nupkg
+          dotnet pack src/IAdetector.Mcp/IAdetector.Mcp.csproj -c Release -o ./nupkg
 
       - name: Publicar en nuget.org
         run: >
