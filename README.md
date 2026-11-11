@@ -95,7 +95,7 @@ Configurar el host MCP (ej. `.vscode/mcp.json`) y `dnx` descarga y ejecuta el se
     "IAdetector": {
       "type": "stdio",
       "command": "dnx",
-      "args": ["IAdetector.Mcp", "--version", "1.0.0", "--yes"]
+      "args": ["IAdetector.Mcp", "--version", "1.0.1", "--yes"]
     }
   }
 }

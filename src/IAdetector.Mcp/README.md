@@ -1,3 +1,5 @@
+<!-- mcp-name: io.github.JOSETRA44/iadetector-mcp -->
+
 # IAdetector MCP Server
 
 Servidor MCP que detecta si un texto fue generado por IA, **100% local** (sin llamar a ninguna API externa de pago). Ver el README principal del repositorio (`../../README.md`) para la arquitectura completa, cómo descargar los modelos ONNX y más detalles.
@@ -55,7 +57,7 @@ Una vez publicado, se configura con el comando `dnx` (VS Code: `.vscode/mcp.json
     "IAdetector": {
       "type": "stdio",
       "command": "dnx",
-      "args": ["IAdetector.Mcp", "--version", "0.1.0-beta", "--yes"]
+      "args": ["IAdetector.Mcp", "--version", "1.0.1", "--yes"]
     }
   }
 }

@@ -7,14 +7,28 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-11
+
+Parche de publicación: deja los paquetes y el manifiesto listos para el registro
+oficial MCP. Sin cambios en el detector ni en sus calibraciones.
+
 ### Fixed
 
 - **Publicación en NuGet corregida**: la versión de `IAdetector.Mcp` seguía en
   `0.1.0-beta` y el `server.json` interno del paquete era aún la plantilla, con
   marcadores `<your GitHub username here>`; el `server.json` de la raíz apuntaba
-  además al paquete de la CLI en vez de al del servidor. Los tres quedan en 1.0.0
-  y apuntando a `IAdetector.Mcp`, que es el paquete que el registro MCP instala
-  con `dnx`. Instalación en un comando: `dotnet tool install -g IAdetector.Cli`.
+  además al paquete de la CLI en vez de al del servidor. Ambos apuntan a
+  `IAdetector.Mcp`, que es el paquete que el registro MCP instala con `dnx`.
+  Instalación en un comando: `dotnet tool install -g IAdetector.Cli`.
+- **Licencia en el paquete Mcp**: nuget.org marcó «License missing» en los
+  paquetes 1.0.0 de `IAdetector.Mcp`; su `.csproj` ahora declara
+  `PackageLicenseExpression` MIT, URL del proyecto y autoría.
+- **Listo para el registro MCP**: las descripciones del `server.json` de la raíz
+  y del interno del paquete superaban el máximo de 100 caracteres del registro
+  (142 y 129); la nueva descripción común tiene 81. El README empaquetado con el
+  servidor incluye la marca de propiedad `mcp-name: io.github.JOSETRA44/iadetector-mcp`
+  que el registro exige para paquetes NuGet, el esquema del manifiesto interno se
+  alinea al 2025-12-11 y el ejemplo `dnx` del README ya no muestra la beta.
 
 ## [1.0.0] - 2026-11-10
 
