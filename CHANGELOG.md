@@ -7,6 +7,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-20
+
 ### Changed
 
 - **Perfil en español recalibrado (Fase 2.1, segunda temporada)**: el ensemble en
@@ -147,5 +149,6 @@ integridad verificable de los modelos descargados.
 - Data goes to stdout and notes to stderr, so piping to `jq` always yields
   parseable output.
 
-[Unreleased]: https://github.com/JOSETRA44/iadetector-mcp/compare/v0.1.0-beta...HEAD
+[Unreleased]: https://github.com/JOSETRA44/iadetector-mcp/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/JOSETRA44/iadetector-mcp/compare/v1.0.1...v1.1.0
 [0.1.0-beta]: https://github.com/JOSETRA44/iadetector-mcp/releases/tag/v0.1.0-beta

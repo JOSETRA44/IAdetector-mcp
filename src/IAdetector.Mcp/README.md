@@ -57,7 +57,7 @@ Una vez publicado, se configura con el comando `dnx` (VS Code: `.vscode/mcp.json
     "IAdetector": {
       "type": "stdio",
       "command": "dnx",
-      "args": ["IAdetector.Mcp", "--version", "1.0.1", "--yes"]
+      "args": ["IAdetector.Mcp", "--version", "1.1.0", "--yes"]
     }
   }
 }
