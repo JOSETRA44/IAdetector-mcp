@@ -118,6 +118,48 @@ esperable); (2) corpus de 400+ palabras para que TTR/entropía puedan calibrarse
 en español; (3) evaluar un clasificador multilingüe como señal, ahora ya con
 corpus contra el que medirlo.
 
+## Fase 2.1 (segunda temporada): robustez entre generadores (hecho)
+
+Se cierra la deuda (1) de la 3.2: sobre los mismos 232 temas de IA del corpus
+anterior se generaron 232 textos con **ChatGPT** (vía Codex, 216–264 palabras) y
+232 con **Claude** (Opus), que se suman a los 232 de Gemini y a los 336 humanos:
+**1.032 muestras en 371 grupos-tema** (procedencia completa en
+`scripts/calibration/data/es/train_es_21.provenance.txt`). Mismo procedimiento
+de ajuste (GroupKFold por tema). Se ajustaron dos variantes y se aplicó la de
+**pesos unitarios**:
+
+| Métrica (agrupada) | Español (3.2) | Español (2.1) |
+|---|---|---|
+| Accuracy | 0,9067 | 0,8992 |
+| Brier | 0,0821 | 0,0834 |
+| ECE | 0,0964 | **0,0701** |
+| AUROC | 0,9582 | 0,9413 |
+
+**Verificación fuera del corpus** (el mismo held-out de la Fase 3, Muse Spark,
+generador no visto en ambas calibraciones):
+
+| Held-out Fase 3 | Perfil 3.2 | Perfil 2.1 |
+|---|---|---|
+| Falsos positivos (humanos clásicos) | 1/21 | 2/21 |
+| IA detectada | 12/18 (67 %) | **17/18 (94 %)** |
+
+**Lectura honesta**: la generalización a generador no visto mejora mucho
+(67 % → 94 %), que era el objetivo de la fase, pero el coste es real: un falso
+positivo más (los dos son prosa clásica — un fragmento del *Quijote*, p = 0,657,
+y uno de *La Regenta*, p = 0,765; no son casos al límite) y las métricas internas
+quedan ligeramente por debajo de la 3.2, salvo la ECE, que mejora. Fuera de fold,
+Claude es el generador más difícil de detectar (85,8 %; Gemini y ChatGPT,
+99,1 %) y los humanos bajan al 80,1 %. La variante con `class_weight='balanced'`
+respetaba el límite de falsos positivos (1/21) pero solo detectaba 13/18 y era
+peor en todo lo demás: no se aplicó. Coeficientes 2.1: burstiness 8,59;
+compression-ratio 1,93; ngram-repetition −1,53; los ONNX ingleses y la
+perplexity siguen en ≈0, y TTR/entropía siguen sin medir (corpus de 200–300
+palabras). El aviso en español de `explain_detection` declara ahora el nivel de
+la Fase 2.1 (0,90, tres generadores, 17/18 ante generador no visto).
+
+**Deuda que queda**: (2) corpus de 400+ palabras para calibrar TTR/entropía en
+español; (3) evaluar un clasificador multilingüe como señal.
+
 ## La decisión que quedó (resuelta en la 3.2)
 
 Calibrar un **perfil en español** (`EnsembleWeightsEs.json` + enrutado por idioma en

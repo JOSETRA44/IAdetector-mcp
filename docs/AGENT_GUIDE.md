@@ -124,11 +124,12 @@ El detalle completo, con ejemplos de decisiones, está en
 
 - **Inglés**: perfil calibrado sobre HC3 (1 684 textos, validación agrupada por
   pregunta): accuracy 0,9697, AUROC 0,9924.
-- **Español**: perfil propio calibrado sobre un corpus de 568 textos (Fase 3.2):
-  accuracy agrupada 0,9067. Menor que el inglés, y el propio `explain_detection` lo
-  declara en `warnings`. La IA de ese corpus procede de pocos generadores; ante IA de
-  otro generador la detección medida fue 12/18. Trata los resultados en español con
-  más cautela y no prometas paridad con el inglés.
+- **Español**: perfil propio calibrado sobre un corpus de 1 032 textos (Fase 2.1):
+  accuracy agrupada 0,8992. Menor que el inglés, y el propio `explain_detection` lo
+  declara en `warnings`. La IA de ese corpus procede de tres generadores (Gemini,
+  ChatGPT y Claude); ante IA de un generador no visto la detección medida fue 17/18
+  (con 2/21 falsos positivos sobre prosa clásica). Trata los resultados en español
+  con más cautela y no prometas paridad con el inglés.
 - **`Unknown`**: se aplica el perfil de inglés y va con aviso.
 - Otros idiomas: sin validar. El detector de idioma solo distingue ES/EN.
 

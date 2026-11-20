@@ -7,6 +7,17 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- **Perfil en español recalibrado (Fase 2.1, segunda temporada)**: el ensemble en
+  español se reentrenó con un corpus multigenerador de 1 032 textos (336 humanos
+  + 232 Gemini + 232 ChatGPT + 232 Claude, sobre los mismos temas). Ante el
+  held-out de generador no visto (Muse Spark, Fase 3) la detección sube de 12/18
+  a 17/18 y los falsos positivos de 1/21 a 2/21 (ambos sobre prosa clásica); la
+  accuracy agrupada interna pasa de 0,9067 a 0,8992 y la ECE mejora de 0,0964 a
+  0,0701. El aviso de fiabilidad en español declara el nuevo nivel. Detalle y
+  lectura honesta en `docs/SPANISH.md`.
+
 ## [1.0.1] - 2026-11-11
 
 Parche de publicación: deja los paquetes y el manifiesto listos para el registro
