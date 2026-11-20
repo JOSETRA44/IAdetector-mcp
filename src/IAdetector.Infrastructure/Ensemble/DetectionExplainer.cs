@@ -103,20 +103,22 @@ public sealed class DetectionExplainer : IDetectionExplainer
 
     /// <summary>
     /// Avisos de fiabilidad por idioma. Desde la Fase 3.2 el español tiene su propio
-    /// perfil calibrado (docs/SPANISH.md): el aviso ya no es «no es fiable», sino el
-    /// nivel real alcanzado — accuracy agrupada 0,91 en su corpus, frente a 0,97 en
-    /// inglés, con la IA de un número reducido de generadores.
+    /// perfil calibrado (docs/SPANISH.md), recalibrado en la Fase 2.1 con tres
+    /// generadores de IA: el aviso ya no es «no es fiable», sino el nivel real
+    /// alcanzado — accuracy agrupada 0,90 en su corpus, frente a 0,97 en inglés.
     /// </summary>
     private static IReadOnlyList<string> BuildWarnings(TextLanguage language) => language switch
     {
         TextLanguage.Spanish =>
         [
-            "Texto en español: se aplicó el perfil calibrado en español (Fase 3.2, "
-            + "docs/SPANISH.md), con accuracy agrupada de 0,91 en su corpus de calibración "
+            "Texto en español: se aplicó el perfil calibrado en español (Fase 2.1, "
+            + "docs/SPANISH.md), con accuracy agrupada de 0,90 en su corpus de calibración "
             + "frente a 0,97 del inglés. Los modelos ONNX son de inglés y en este perfil "
             + "pesan ≈0: la decisión recae sobre todo en burstiness y las demás señales "
-            + "estadísticas. El corpus de IA procede de pocos generadores, así que trata "
-            + "el resultado con más cautela que uno en inglés.",
+            + "estadísticas. El corpus de IA reúne tres generadores (Gemini, ChatGPT y "
+            + "Claude) y ante un generador no visto el perfil detectó 17 de 18 textos en "
+            + "la medición de la Fase 2.1; aun así, trata el resultado con más cautela "
+            + "que uno en inglés.",
         ],
         TextLanguage.Unknown =>
         [

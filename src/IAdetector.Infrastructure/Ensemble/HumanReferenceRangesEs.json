@@ -1,5 +1,5 @@
 {
-  "source": "HC3 wiki_csai, respuestas humanas con datos por señal (features.csv, Fase 1.2)",
+  "source": "Corpus propio en español (Wikipedia ≤2021 y Gutenberg), respuestas humanas con datos por señal (features_train_21.csv, Fase 2.1)",
   "ranges": {
     "burstiness": {
       "p10": 0.091331,
@@ -14,9 +14,9 @@
       "samples": 334
     },
     "onnx-classifier": {
-      "p10": 0.000178,
-      "median": 0.000233,
-      "p90": 0.000299,
+      "p10": 0.000179,
+      "median": 0.000229,
+      "p90": 0.000296,
       "samples": 336
     },
     "perplexity": {

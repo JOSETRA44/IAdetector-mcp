@@ -1,32 +1,26 @@
 {
-  "intercept": -6.347866398551076,
+  "intercept": -5.968411338159152,
   "weights": {
-    "burstiness": 8.01242509829964,
-    "type-token-ratio": -0.0028881155824937114,
-    "lexical-entropy": -0.0028881155824937114,
-    "compression-ratio": 1.2445110269439978,
-    "ngram-repetition": -0.8960590959056233,
-    "onnx-classifier": -0.0035344385681545165,
-    "perplexity": -0.032560502820692894
+    "burstiness": 8.586725145166728,
+    "type-token-ratio": 0.005393593350787328,
+    "lexical-entropy": 0.005393593350787328,
+    "compression-ratio": 1.9307996681824338,
+    "ngram-repetition": -1.5262973029610265,
+    "onnx-classifier": -0.004034160498165094,
+    "perplexity": -0.005745357129202194
   },
   "trainedOn": {
-    "samples": 568,
-    "cvAccuracy": 0.9066901408450704,
-    "trainAccuracy": 0.9084507042253521
+    "samples": 1032,
+    "cvAccuracy": 0.8992248062015504,
+    "trainAccuracy": 0.9011627906976745
   },
   "evaluation": {
     "method": "GroupKFold(5) por pregunta, predicciones fuera de fold",
     "groupedByQuestion": {
-      "accuracy": 0.9066901408450704,
-      "brier": 0.08211483323507184,
-      "ece": 0.09637723047682749,
-      "auroc": 0.9582050492610837
-    },
-    "byRows": {
-      "accuracy": 0.9049295774647887,
-      "brier": 0.08220616056088022,
-      "ece": 0.09237453462862165,
-      "auroc": 0.9579997947454844
+      "accuracy": 0.8992248062015504,
+      "brier": 0.08339447610454166,
+      "ece": 0.07012128000142513,
+      "auroc": 0.9412993466064586
     }
   }
 }
